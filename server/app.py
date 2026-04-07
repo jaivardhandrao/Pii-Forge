@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 import uuid
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -43,22 +44,37 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
 # ── Session management ────────────────────────────────────────────────────────
 
+SESSION_TTL = 1800  # 30 minutes
+
 sessions: Dict[str, PIIScannerEnvironment] = {}
+session_last_active: Dict[str, float] = {}
+
+
+def _cleanup_expired_sessions():
+    """Remove sessions older than SESSION_TTL."""
+    now = time.time()
+    expired = [sid for sid, ts in session_last_active.items() if now - ts > SESSION_TTL]
+    for sid in expired:
+        sessions.pop(sid, None)
+        session_last_active.pop(sid, None)
 
 
 def get_or_create_session(session_id: Optional[str] = None) -> tuple[str, PIIScannerEnvironment]:
+    _cleanup_expired_sessions()
     if session_id and session_id in sessions:
+        session_last_active[session_id] = time.time()
         return session_id, sessions[session_id]
     sid = session_id or str(uuid.uuid4())
     env = PIIScannerEnvironment()
     sessions[sid] = env
+    session_last_active[sid] = time.time()
     return sid, env
 
 
@@ -93,12 +109,14 @@ async def reset(request: ResetRequest):
 
 @app.post("/step")
 async def step(request: StepRequest):
+    _cleanup_expired_sessions()
     if request.session_id not in sessions:
         return JSONResponse(
             status_code=404,
             content={"error": f"Session {request.session_id} not found. Call /reset first."},
         )
     env = sessions[request.session_id]
+    session_last_active[request.session_id] = time.time()
 
     # Parse detected PII
     entities = []

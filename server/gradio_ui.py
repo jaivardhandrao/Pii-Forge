@@ -11,6 +11,7 @@ Interactive UI for testing the PII Scanner environment with:
 
 from __future__ import annotations
 
+import html as html_lib
 import json
 import re
 import sys
@@ -66,12 +67,14 @@ RISK_COLORS = {
     "critical": "#8E44AD",
 }
 
-# ── Global state ────────────────────────────────────────────────────────────
-
-_env = PIIScannerEnvironment()
-_current_obs: Optional[PIIObservation] = None
-_history: List[Dict[str, Any]] = []
-_last_submitted_pii: List[Dict[str, Any]] = []
+def _new_session_state() -> Dict[str, Any]:
+    """Create a fresh per-user session state."""
+    return {
+        "env": PIIScannerEnvironment(),
+        "current_obs": None,
+        "history": [],
+        "last_submitted_pii": [],
+    }
 
 
 # ── Utility functions ───────────────────────────────────────────────────────
@@ -79,12 +82,13 @@ _last_submitted_pii: List[Dict[str, Any]] = []
 def highlight_pii_in_document(document: str, pii_entities: List[Dict[str, Any]]) -> str:
     """Generate HTML with color-coded PII highlights."""
     if not pii_entities or not document:
-        return f"<div style='font-family:monospace;white-space:pre-wrap;padding:12px;background:#1a1a2e;color:#e0e0e0;border-radius:8px;line-height:1.8;'>{document}</div>"
+        safe_doc = html_lib.escape(document or "")
+        return f"<div style='font-family:monospace;white-space:pre-wrap;padding:12px;background:#1a1a2e;color:#e0e0e0;border-radius:8px;line-height:1.8;'>{safe_doc}</div>"
 
     # Sort by start position descending so we can insert tags without shifting offsets
     sorted_pii = sorted(pii_entities, key=lambda x: x.get("start", 0), reverse=True)
 
-    result = document
+    result = html_lib.escape(document)
     for entity in sorted_pii:
         start = entity.get("start", 0)
         end = entity.get("end", 0)
@@ -113,6 +117,9 @@ def build_redaction_diff(original: str, redacted: str) -> str:
     """Generate side-by-side diff HTML for original vs redacted document."""
     if not redacted:
         return "<p style='color:#999;'>No redacted text submitted yet.</p>"
+
+    original = html_lib.escape(original)
+    redacted = html_lib.escape(redacted)
 
     # Highlight [TYPE] tags in the redacted version
     highlighted_redacted = re.sub(
@@ -249,7 +256,7 @@ def build_risk_heatmap(pii_entities: List[Dict[str, Any]], feedback: str) -> str
     """
 
 
-def build_score_dashboard(scores: List[float], task_type: str) -> str:
+def build_score_dashboard(scores: List[float], task_type: str, total_tasks: int = 0) -> str:
     """Build a visual score dashboard."""
     if not scores:
         return "<p style='color:#999;'>No scores yet. Start scanning!</p>"
@@ -286,7 +293,7 @@ def build_score_dashboard(scores: List[float], task_type: str) -> str:
         <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:12px;">
             <div style="font-size:36px;font-weight:bold;color:{avg_color};">{avg:.0%}</div>
             <div style="font-size:13px;color:#999;">
-                Average F1 &middot; {len(scores)}/{_env.state.total_tasks} tasks &middot;
+                Average F1 &middot; {len(scores)}/{total_tasks} tasks &middot;
                 <span style="text-transform:uppercase;color:#5DADE2;">{task_type}</span>
             </div>
         </div>
@@ -309,14 +316,14 @@ def build_pii_legend() -> str:
 
 # ── Environment handlers ────────────────────────────────────────────────────
 
-def reset_environment(difficulty: str):
+def reset_environment(difficulty: str, session: Dict[str, Any]):
     """Reset the environment with a new difficulty."""
-    global _current_obs, _history, _last_submitted_pii
-    _history = []
-    _last_submitted_pii = []
+    session["history"] = []
+    session["last_submitted_pii"] = []
 
-    obs = _env.reset(task_type=difficulty.lower())
-    _current_obs = obs
+    env = session["env"]
+    obs = env.reset(task_type=difficulty.lower())
+    session["current_obs"] = obs
 
     progress = f"Task {obs.current_task_number} / {obs.total_tasks}"
 
@@ -330,18 +337,19 @@ def reset_environment(difficulty: str):
         "<p style='color:#999;'>Submit PII detections to see the risk analysis.</p>",  # risk_heatmap
         "<p style='color:#999;'>Redaction diff available in Hard mode.</p>",  # redaction_diff
         build_pii_legend(),                                         # pii_legend
+        session,                                                    # updated session state
     )
 
 
-def submit_detection(pii_json_text: str, redacted_text: str, compliance_json_text: str):
+def submit_detection(pii_json_text: str, redacted_text: str, compliance_json_text: str, session: Dict[str, Any]):
     """Submit PII detection results to the environment."""
-    global _current_obs, _history, _last_submitted_pii
+    current_obs = session.get("current_obs")
 
-    if _current_obs is None or _current_obs.done:
+    if current_obs is None or current_obs.done:
         err = "Episode ended. Reset to start again."
-        return (err, "", "", "", "", "", "", "")
+        return (err, "", "", "", "", "", "", "", session)
 
-    current_document = _current_obs.document
+    current_document = current_obs.document
 
     # Parse PII entities from JSON
     entities = []
@@ -363,9 +371,9 @@ def submit_detection(pii_json_text: str, redacted_text: str, compliance_json_tex
             })
     except (json.JSONDecodeError, ValueError) as e:
         err = f"Error parsing PII JSON: {e}"
-        return (err, "", "", "", "", "", "", "")
+        return (err, "", "", "", "", "", "", "", session)
 
-    _last_submitted_pii = pii_dicts
+    session["last_submitted_pii"] = pii_dicts
 
     # Parse compliance report
     compliance = None
@@ -387,7 +395,7 @@ def submit_detection(pii_json_text: str, redacted_text: str, compliance_json_tex
             )
         except (json.JSONDecodeError, ValueError) as e:
             err = f"Error parsing compliance JSON: {e}"
-            return (err, "", "", "", "", "", "", "")
+            return (err, "", "", "", "", "", "", "", session)
 
     action = PIIAction(
         detected_pii=entities,
@@ -395,15 +403,16 @@ def submit_detection(pii_json_text: str, redacted_text: str, compliance_json_tex
         compliance_report=compliance,
     )
 
-    obs = _env.step(action)
-    _current_obs = obs
-    state = _env.state
+    env = session["env"]
+    obs = env.step(action)
+    session["current_obs"] = obs
+    state = env.state
 
     progress = f"Task {obs.current_task_number} / {obs.total_tasks}"
     if obs.done:
         progress = f"COMPLETE - All {obs.total_tasks} tasks done!"
 
-    _history.append({
+    session["history"].append({
         "task": obs.task_id,
         "reward": obs.reward,
         "entities_submitted": len(entities),
@@ -412,7 +421,7 @@ def submit_detection(pii_json_text: str, redacted_text: str, compliance_json_tex
     # Build visual outputs
     highlighted = highlight_pii_in_document(current_document, pii_dicts)
     risk = build_risk_heatmap(pii_dicts, obs.feedback or "")
-    score_dash = build_score_dashboard(state.scores, state.task_type.value)
+    score_dash = build_score_dashboard(state.scores, state.task_type.value, state.total_tasks)
 
     # Redaction diff
     diff_html = build_redaction_diff(current_document, redacted_text) if redacted_text else (
@@ -431,6 +440,7 @@ def submit_detection(pii_json_text: str, redacted_text: str, compliance_json_tex
         risk,           # risk_heatmap
         diff_html,      # redaction_diff
         json.dumps(obs.metadata, indent=2, default=str) if obs.metadata else "",  # metadata
+        session,        # updated session state
     )
 
 
@@ -678,24 +688,28 @@ def create_gradio_app() -> gr.Blocks:
                 | `/docs` | GET | Swagger API docs |
                 """)
 
+        # ── Per-user session state ──────────────────────────────────────
+        session_state = gr.State(value=_new_session_state)
+
         # ── Wire up events ──────────────────────────────────────────────
 
         reset_btn.click(
             fn=reset_environment,
-            inputs=[difficulty],
+            inputs=[difficulty, session_state],
             outputs=[
                 doc_raw, instructions, progress, score_dashboard,
                 feedback, highlighted_doc, risk_heatmap, redaction_diff,
-                pii_legend,
+                pii_legend, session_state,
             ],
         )
 
         submit_btn.click(
             fn=submit_detection,
-            inputs=[pii_json, redacted, compliance_json],
+            inputs=[pii_json, redacted, compliance_json, session_state],
             outputs=[
                 feedback, doc_raw, progress, score_dashboard,
                 highlighted_doc, risk_heatmap, redaction_diff, metadata,
+                session_state,
             ],
         )
 
