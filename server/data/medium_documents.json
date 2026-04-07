@@ -1,0 +1,185 @@
+[
+  {
+    "id": "medium_01",
+    "document": "Hey team, just spoke with the patient in Room 4B — Ramesh Gupta, age 34, diabetic since 2019. He was referred by Dr. Ananya Krishnan from Apollo Hospital Chennai. His wife Priya can be reached at their Koramangala residence if anything comes up.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Ramesh Gupta", "start": 52, "end": 64},
+      {"pii_type": "AGE", "value": "34", "start": 70, "end": 72},
+      {"pii_type": "MEDICAL_CONDITION", "value": "diabetic since 2019", "start": 74, "end": 93},
+      {"pii_type": "NAME", "value": "Dr. Ananya Krishnan", "start": 114, "end": 133},
+      {"pii_type": "ORGANIZATION", "value": "Apollo Hospital Chennai", "start": 139, "end": 162},
+      {"pii_type": "NAME", "value": "Priya", "start": 174, "end": 179},
+      {"pii_type": "LOCATION", "value": "Koramangala", "start": 204, "end": 215}
+    ]
+  },
+  {
+    "id": "medium_02",
+    "document": "Meeting notes 03/12/2026: Discussed performance issues with senior developer Alex Thompson. He mentioned he's been dealing with anxiety and requested a lighter workload. His manager Karen Wu approved two weeks remote from his home in Palo Alto. Alex's employee portal username is athompson42.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Alex Thompson", "start": 72, "end": 85},
+      {"pii_type": "MEDICAL_CONDITION", "value": "anxiety", "start": 120, "end": 127},
+      {"pii_type": "NAME", "value": "Karen Wu", "start": 170, "end": 178},
+      {"pii_type": "LOCATION", "value": "Palo Alto", "start": 222, "end": 231},
+      {"pii_type": "USERNAME", "value": "athompson42", "start": 276, "end": 287}
+    ]
+  },
+  {
+    "id": "medium_03",
+    "document": "Slack DM from recruiting: The candidate from IIT Bombay, Vikram Mehta, born in '94, currently at Google Bangalore — he cleared all rounds. Offer letter going to his personal email. He mentioned his wife Neha is expecting, so he wants paternity leave info. Salary discussion was around 45 LPA.",
+    "ground_truth": [
+      {"pii_type": "ORGANIZATION", "value": "IIT Bombay", "start": 45, "end": 55},
+      {"pii_type": "NAME", "value": "Vikram Mehta", "start": 57, "end": 69},
+      {"pii_type": "DATE_OF_BIRTH", "value": "'94", "start": 79, "end": 82},
+      {"pii_type": "ORGANIZATION", "value": "Google Bangalore", "start": 98, "end": 114},
+      {"pii_type": "NAME", "value": "Neha", "start": 203, "end": 207},
+      {"pii_type": "MEDICAL_CONDITION", "value": "expecting", "start": 211, "end": 220},
+      {"pii_type": "SALARY", "value": "45 LPA", "start": 282, "end": 288}
+    ]
+  },
+  {
+    "id": "medium_04",
+    "document": "Dr. Patel's clinical notes: Mrs. Lakshmi Iyer, female, mid-fifties, presented with Stage 2 hypertension and elevated cholesterol. Currently on Metformin 500mg for pre-diabetes. Patient resides near Jayanagar 4th Block. Daughter Meera is the emergency contact — she works at Infosys Electronic City campus.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Dr. Patel", "start": 0, "end": 9},
+      {"pii_type": "NAME", "value": "Mrs. Lakshmi Iyer", "start": 28, "end": 46},
+      {"pii_type": "AGE", "value": "mid-fifties", "start": 56, "end": 67},
+      {"pii_type": "MEDICAL_CONDITION", "value": "Stage 2 hypertension", "start": 84, "end": 104},
+      {"pii_type": "MEDICAL_CONDITION", "value": "elevated cholesterol", "start": 109, "end": 129},
+      {"pii_type": "MEDICATION", "value": "Metformin 500mg", "start": 145, "end": 160},
+      {"pii_type": "MEDICAL_CONDITION", "value": "pre-diabetes", "start": 165, "end": 177},
+      {"pii_type": "LOCATION", "value": "Jayanagar 4th Block", "start": 201, "end": 220},
+      {"pii_type": "NAME", "value": "Meera", "start": 232, "end": 237},
+      {"pii_type": "ORGANIZATION", "value": "Infosys Electronic City", "start": 274, "end": 297}
+    ]
+  },
+  {
+    "id": "medium_05",
+    "document": "Chat log from support: User jsmith_99 (IP: 10.42.156.78) reported issues with their account. After verification, confirmed identity as James Smith from the Brooklyn office. He shared his screen showing a document with his bank routing number 021000021 and mentioned he recently moved to 45 Atlantic Ave, Brooklyn.",
+    "ground_truth": [
+      {"pii_type": "USERNAME", "value": "jsmith_99", "start": 27, "end": 36},
+      {"pii_type": "IP_ADDRESS", "value": "10.42.156.78", "start": 42, "end": 54},
+      {"pii_type": "NAME", "value": "James Smith", "start": 131, "end": 142},
+      {"pii_type": "LOCATION", "value": "Brooklyn", "start": 152, "end": 160},
+      {"pii_type": "BANK_ACCOUNT", "value": "021000021", "start": 240, "end": 249},
+      {"pii_type": "ADDRESS", "value": "45 Atlantic Ave, Brooklyn", "start": 287, "end": 312}
+    ]
+  },
+  {
+    "id": "medium_06",
+    "document": "Internal memo: Our CFO Samantha Rodriguez disclosed during the board meeting that she's undergoing chemotherapy. She'll be working reduced hours from her residence in Pacific Heights, San Francisco. Her assistant David Park (dpark@corp.com) will handle communications. Please keep this strictly confidential.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Samantha Rodriguez", "start": 24, "end": 42},
+      {"pii_type": "MEDICAL_CONDITION", "value": "chemotherapy", "start": 96, "end": 108},
+      {"pii_type": "LOCATION", "value": "Pacific Heights, San Francisco", "start": 162, "end": 192},
+      {"pii_type": "NAME", "value": "David Park", "start": 209, "end": 219},
+      {"pii_type": "EMAIL", "value": "dpark@corp.com", "start": 221, "end": 235}
+    ]
+  },
+  {
+    "id": "medium_07",
+    "document": "Incident report: On Tuesday evening, warehouse worker Miguel Torres, employee since 2018, slipped on wet floor in Section C. He sustained a fractured wrist and mild concussion. Miguel is 28, lives with his family in East Oakland. Supervisor Tom Bradley filed the report. Workers' comp claim initiated.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Miguel Torres", "start": 55, "end": 68},
+      {"pii_type": "MEDICAL_CONDITION", "value": "fractured wrist", "start": 139, "end": 154},
+      {"pii_type": "MEDICAL_CONDITION", "value": "mild concussion", "start": 159, "end": 174},
+      {"pii_type": "AGE", "value": "28", "start": 186, "end": 188},
+      {"pii_type": "LOCATION", "value": "East Oakland", "start": 218, "end": 230},
+      {"pii_type": "NAME", "value": "Tom Bradley", "start": 243, "end": 254}
+    ]
+  },
+  {
+    "id": "medium_08",
+    "document": "Therapy session notes: Patient ID CLN-4492, female college student, 20 years old, referred for depression and eating disorder. She mentioned her roommate Aisha knows about her condition. Patient is from Pune, currently studying at MIT Manipal. Father is a surgeon at Manipal Hospital.",
+    "ground_truth": [
+      {"pii_type": "EMPLOYEE_ID", "value": "CLN-4492", "start": 33, "end": 41},
+      {"pii_type": "AGE", "value": "20 years old", "start": 68, "end": 80},
+      {"pii_type": "MEDICAL_CONDITION", "value": "depression", "start": 95, "end": 105},
+      {"pii_type": "MEDICAL_CONDITION", "value": "eating disorder", "start": 110, "end": 125},
+      {"pii_type": "NAME", "value": "Aisha", "start": 157, "end": 162},
+      {"pii_type": "LOCATION", "value": "Pune", "start": 204, "end": 208},
+      {"pii_type": "ORGANIZATION", "value": "MIT Manipal", "start": 232, "end": 243},
+      {"pii_type": "ORGANIZATION", "value": "Manipal Hospital", "start": 266, "end": 282}
+    ]
+  },
+  {
+    "id": "medium_09",
+    "document": "Email thread: Hi team, the background check for our new VP of Engineering, Sundar Rajan, came back. He previously worked at Meta and Amazon. His credit score is 780. He'll be relocating from his Bellevue home. His LinkedIn shows connections to three board members. Start date is April 15th. Compensation package discussed privately.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Sundar Rajan", "start": 76, "end": 88},
+      {"pii_type": "ORGANIZATION", "value": "Meta", "start": 113, "end": 117},
+      {"pii_type": "ORGANIZATION", "value": "Amazon", "start": 122, "end": 128},
+      {"pii_type": "LOCATION", "value": "Bellevue", "start": 195, "end": 203}
+    ]
+  },
+  {
+    "id": "medium_10",
+    "document": "WhatsApp group - Project Alpha: Guys, Deepa Nair from the Chennai office just had her baby yesterday! She's on maternity leave for 6 months. Her husband Arjun dropped off her laptop at reception. Also FYI she had mentioned gestational diabetes during her leave planning. Let's send flowers to their T. Nagar address.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Deepa Nair", "start": 39, "end": 49},
+      {"pii_type": "LOCATION", "value": "Chennai", "start": 59, "end": 66},
+      {"pii_type": "NAME", "value": "Arjun", "start": 152, "end": 157},
+      {"pii_type": "MEDICAL_CONDITION", "value": "gestational diabetes", "start": 232, "end": 252},
+      {"pii_type": "LOCATION", "value": "T. Nagar", "start": 303, "end": 311}
+    ]
+  },
+  {
+    "id": "medium_11",
+    "document": "Forwarded complaint: The customer said — and I quote — 'my name is Priya dot Sharma at gmail dot com and I have been waiting since forever.' She also gave her number as four-zero-eight, five-five-five, zero-one-two-three. Her son Rohan, a minor aged 12, was the one originally affected. They live somewhere in Indiranagar.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Priya", "start": 67, "end": 72},
+      {"pii_type": "EMAIL", "value": "Priya dot Sharma at gmail dot com", "start": 67, "end": 100},
+      {"pii_type": "PHONE", "value": "four-zero-eight, five-five-five, zero-one-two-three", "start": 170, "end": 221},
+      {"pii_type": "NAME", "value": "Rohan", "start": 232, "end": 237},
+      {"pii_type": "AGE", "value": "12", "start": 253, "end": 255},
+      {"pii_type": "LOCATION", "value": "Indiranagar", "start": 309, "end": 320}
+    ]
+  },
+  {
+    "id": "medium_12",
+    "document": "Audit trail: User logged in from IP one-ninety-two dot one-sixty-eight dot one dot forty-five at 03:14 AM. Account holder: K***a M***i (partially masked in logs). System flagged transaction of Rs. 2,50,000 to account ending 4829. The KYC document showed Aadhaar number XXXX-XXXX-7834. User's registered mobile: +91-98XXX-XX210.",
+    "ground_truth": [
+      {"pii_type": "IP_ADDRESS", "value": "one-ninety-two dot one-sixty-eight dot one dot forty-five", "start": 31, "end": 88},
+      {"pii_type": "NAME", "value": "K***a M***i", "start": 119, "end": 130},
+      {"pii_type": "SALARY", "value": "Rs. 2,50,000", "start": 178, "end": 190},
+      {"pii_type": "BANK_ACCOUNT", "value": "4829", "start": 213, "end": 217},
+      {"pii_type": "PASSPORT", "value": "XXXX-XXXX-7834", "start": 257, "end": 271},
+      {"pii_type": "PHONE", "value": "+91-98XXX-XX210", "start": 299, "end": 314}
+    ]
+  },
+  {
+    "id": "medium_13",
+    "document": "Interview debrief: Candidate seemed nervous. She's a single mother — mentioned it offhand — two kids, lives in a rented flat near Whitefield. Said she left her previous role at TCS because of 'personal health issues' (didn't elaborate). Her LinkedIn says she went to BITS Pilani. Resume lists her DOB as January nineteen eighty-nine. Current CTC: undisclosed but hinted 'north of 20 lakhs.'",
+    "ground_truth": [
+      {"pii_type": "LOCATION", "value": "Whitefield", "start": 129, "end": 139},
+      {"pii_type": "ORGANIZATION", "value": "TCS", "start": 178, "end": 181},
+      {"pii_type": "MEDICAL_CONDITION", "value": "personal health issues", "start": 195, "end": 217},
+      {"pii_type": "ORGANIZATION", "value": "BITS Pilani", "start": 268, "end": 279},
+      {"pii_type": "DATE_OF_BIRTH", "value": "January nineteen eighty-nine", "start": 308, "end": 336},
+      {"pii_type": "SALARY", "value": "north of 20 lakhs", "start": 370, "end": 388}
+    ]
+  },
+  {
+    "id": "medium_14",
+    "document": "Overheard in break room (reported to HR): 'Did you know Ankit from accounting has been going to AA meetings? His wife Sneha told Pooja in marketing. Also apparently he owes like 15 lakhs on his credit card. Poor guy, he's only thirty-two and already looks so stressed. He stays in that society near Hebbal flyover.'",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Ankit", "start": 57, "end": 62},
+      {"pii_type": "MEDICAL_CONDITION", "value": "AA meetings", "start": 94, "end": 105},
+      {"pii_type": "NAME", "value": "Sneha", "start": 116, "end": 121},
+      {"pii_type": "NAME", "value": "Pooja", "start": 127, "end": 132},
+      {"pii_type": "SALARY", "value": "15 lakhs", "start": 175, "end": 183},
+      {"pii_type": "AGE", "value": "thirty-two", "start": 233, "end": 243},
+      {"pii_type": "LOCATION", "value": "Hebbal flyover", "start": 297, "end": 311}
+    ]
+  },
+  {
+    "id": "medium_15",
+    "document": "Data breach notification draft: We regret to inform that a subset of user records was accessed. Affected fields include: first name + last initial (e.g., 'Meghna S.'), partial phone (last 4 digits: 9021), hashed email addresses, and approximate location (pin code 560034). One user, handle @mega_dev on our platform, had their recovery question exposed — 'mother's maiden name.' Total affected: 2,341 accounts across the Bangalore region.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Meghna S.", "start": 152, "end": 161},
+      {"pii_type": "PHONE", "value": "9021", "start": 188, "end": 192},
+      {"pii_type": "LOCATION", "value": "560034", "start": 243, "end": 249},
+      {"pii_type": "USERNAME", "value": "@mega_dev", "start": 263, "end": 272},
+      {"pii_type": "LOCATION", "value": "Bangalore", "start": 416, "end": 425}
+    ]
+  }
+]

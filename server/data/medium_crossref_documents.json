@@ -1,0 +1,64 @@
+[
+  {
+    "id": "mxref_01",
+    "document": "Anonymized survey result #4417: Respondent is a 38-year-old female software engineer at a Koramangala-based startup (Series B, 45 employees). She reported burnout and insomnia. Household income bracket: 30-40 LPA. Pin code: 560034. Only one female engineer matches this profile in that zip code.",
+    "ground_truth": [
+      {"pii_type": "EMPLOYEE_ID", "value": "4417", "start": 32, "end": 36},
+      {"pii_type": "AGE", "value": "38-year-old", "start": 53, "end": 64},
+      {"pii_type": "LOCATION", "value": "Koramangala", "start": 91, "end": 102},
+      {"pii_type": "MEDICAL_CONDITION", "value": "burnout", "start": 156, "end": 163},
+      {"pii_type": "MEDICAL_CONDITION", "value": "insomnia", "start": 168, "end": 176},
+      {"pii_type": "SALARY", "value": "30-40 LPA", "start": 205, "end": 214},
+      {"pii_type": "LOCATION", "value": "560034", "start": 226, "end": 232}
+    ]
+  },
+  {
+    "id": "mxref_02",
+    "document": "De-identified patient record: Male, age 67, retired military officer, admitted to Ward 7 of a government hospital in Secunderabad on 12-Jan-2026. Diagnosis: early-stage Parkinson's. His pension ID ends in 4481. Spouse visits daily from their Banjara Hills home. Only one retired colonel from that area was admitted that week.",
+    "ground_truth": [
+      {"pii_type": "AGE", "value": "67", "start": 42, "end": 44},
+      {"pii_type": "LOCATION", "value": "Secunderabad", "start": 117, "end": 129},
+      {"pii_type": "DATE_OF_BIRTH", "value": "12-Jan-2026", "start": 133, "end": 144},
+      {"pii_type": "MEDICAL_CONDITION", "value": "early-stage Parkinson's", "start": 157, "end": 180},
+      {"pii_type": "EMPLOYEE_ID", "value": "4481", "start": 200, "end": 204},
+      {"pii_type": "LOCATION", "value": "Banjara Hills", "start": 240, "end": 253}
+    ]
+  },
+  {
+    "id": "mxref_03",
+    "document": "HR analytics dashboard (aggregated): Engineering team attrition Q1 2026 — 3 resignations. Breakdown: 1 male (age 29, 2 years tenure, Bangalore office), 1 female (age 34, 4 years, Hyderabad office, cited childcare), 1 male (age 41, 7 years, Bangalore, salary band E5 = 28-32 LPA). With only 12 engineers total, peers can identify who left.",
+    "ground_truth": [
+      {"pii_type": "AGE", "value": "29", "start": 118, "end": 120},
+      {"pii_type": "LOCATION", "value": "Bangalore", "start": 138, "end": 147},
+      {"pii_type": "AGE", "value": "34", "start": 168, "end": 170},
+      {"pii_type": "LOCATION", "value": "Hyderabad", "start": 181, "end": 190},
+      {"pii_type": "AGE", "value": "41", "start": 219, "end": 221},
+      {"pii_type": "LOCATION", "value": "Bangalore", "start": 232, "end": 241},
+      {"pii_type": "SALARY", "value": "28-32 LPA", "start": 258, "end": 267}
+    ]
+  },
+  {
+    "id": "mxref_04",
+    "document": "Insurance claim #IC-2026-8834: Claimant profile — female, DOB 15/08/1991, policy holder since 2018, residential pin 411038 (Pune). Claim type: maternity. Hospital: Ruby Hall Clinic. Delivery date: 03/02/2026. Spouse listed as co-policyholder. The combination of DOB + pin + hospital + delivery date uniquely identifies this person in our records.",
+    "ground_truth": [
+      {"pii_type": "EMPLOYEE_ID", "value": "IC-2026-8834", "start": 17, "end": 29},
+      {"pii_type": "DATE_OF_BIRTH", "value": "15/08/1991", "start": 62, "end": 72},
+      {"pii_type": "LOCATION", "value": "411038", "start": 117, "end": 123},
+      {"pii_type": "LOCATION", "value": "Pune", "start": 125, "end": 129},
+      {"pii_type": "ORGANIZATION", "value": "Ruby Hall Clinic", "start": 170, "end": 186},
+      {"pii_type": "DATE_OF_BIRTH", "value": "03/02/2026", "start": 204, "end": 214}
+    ]
+  },
+  {
+    "id": "mxref_05",
+    "document": "Research dataset metadata: Study on workplace stress among IT professionals in Whitefield, Bangalore. Sample size: 8 participants. Participant P-003: male, age 26, junior developer, diagnosed with GAD (generalized anxiety disorder), single, lives alone in a 1BHK near ITPL. Monthly rent: 18,000. This small sample makes P-003 trivially identifiable by any colleague.",
+    "ground_truth": [
+      {"pii_type": "LOCATION", "value": "Whitefield, Bangalore", "start": 80, "end": 101},
+      {"pii_type": "EMPLOYEE_ID", "value": "P-003", "start": 133, "end": 138},
+      {"pii_type": "AGE", "value": "26", "start": 146, "end": 148},
+      {"pii_type": "MEDICAL_CONDITION", "value": "GAD (generalized anxiety disorder)", "start": 178, "end": 212},
+      {"pii_type": "LOCATION", "value": "ITPL", "start": 271, "end": 275},
+      {"pii_type": "SALARY", "value": "18,000", "start": 292, "end": 298}
+    ]
+  }
+]

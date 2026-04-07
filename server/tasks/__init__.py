@@ -1,0 +1,23 @@
+"""Task definitions for all 6 difficulty levels."""
+
+from .task_easy import EASY_INSTRUCTIONS
+from .task_medium import MEDIUM_INSTRUCTIONS
+from .task_medium_obfuscated import MEDIUM_OBFUSCATED_INSTRUCTIONS
+from .task_medium_crossref import MEDIUM_CROSSREF_INSTRUCTIONS
+from .task_hard import HARD_INSTRUCTIONS
+from .task_hard_adversarial import HARD_ADVERSARIAL_INSTRUCTIONS
+
+# Aliases for backward compatibility
+MEDIUM_CONTEXTUAL_INSTRUCTIONS = MEDIUM_INSTRUCTIONS
+HARD_AUDIT_INSTRUCTIONS = HARD_INSTRUCTIONS
+
+__all__ = [
+    "EASY_INSTRUCTIONS",
+    "MEDIUM_INSTRUCTIONS",
+    "MEDIUM_CONTEXTUAL_INSTRUCTIONS",
+    "MEDIUM_OBFUSCATED_INSTRUCTIONS",
+    "MEDIUM_CROSSREF_INSTRUCTIONS",
+    "HARD_INSTRUCTIONS",
+    "HARD_AUDIT_INSTRUCTIONS",
+    "HARD_ADVERSARIAL_INSTRUCTIONS",
+]

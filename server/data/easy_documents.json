@@ -1,0 +1,116 @@
+[
+  {
+    "id": "easy_01",
+    "document": "Please contact Sarah Miller at sarah.miller@techcorp.com or call her at 408-555-0147. Her Social Security Number is 482-93-1057 and her date of birth is 03/15/1990.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Sarah Miller", "start": 15, "end": 27},
+      {"pii_type": "EMAIL", "value": "sarah.miller@techcorp.com", "start": 31, "end": 56},
+      {"pii_type": "PHONE", "value": "408-555-0147", "start": 76, "end": 88},
+      {"pii_type": "SSN", "value": "482-93-1057", "start": 119, "end": 130},
+      {"pii_type": "DATE_OF_BIRTH", "value": "03/15/1990", "start": 155, "end": 165}
+    ]
+  },
+  {
+    "id": "easy_02",
+    "document": "Employee Record: John Davis, Employee ID: EMP-4821, Email: john.davis@globalinc.org, Phone: (650) 555-0198. SSN: 291-84-5630. Address: 1425 Oak Street, San Jose, CA 95112.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "John Davis", "start": 17, "end": 27},
+      {"pii_type": "EMPLOYEE_ID", "value": "EMP-4821", "start": 42, "end": 50},
+      {"pii_type": "EMAIL", "value": "john.davis@globalinc.org", "start": 59, "end": 83},
+      {"pii_type": "PHONE", "value": "(650) 555-0198", "start": 92, "end": 106},
+      {"pii_type": "SSN", "value": "291-84-5630", "start": 113, "end": 124},
+      {"pii_type": "ADDRESS", "value": "1425 Oak Street, San Jose, CA 95112", "start": 135, "end": 170}
+    ]
+  },
+  {
+    "id": "easy_03",
+    "document": "Invoice for: Maria Garcia, Credit Card: 4532-8901-2345-6789, Exp: 09/27. Billing address: 789 Elm Ave, Austin, TX 73301. Contact: maria.g@email.com, Phone: 512-555-0234.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Maria Garcia", "start": 13, "end": 25},
+      {"pii_type": "CREDIT_CARD", "value": "4532-8901-2345-6789", "start": 40, "end": 59},
+      {"pii_type": "ADDRESS", "value": "789 Elm Ave, Austin, TX 73301", "start": 89, "end": 118},
+      {"pii_type": "EMAIL", "value": "maria.g@email.com", "start": 129, "end": 147},
+      {"pii_type": "PHONE", "value": "512-555-0234", "start": 156, "end": 168}
+    ]
+  },
+  {
+    "id": "easy_04",
+    "document": "New hire onboarding: Robert Chen, DOB: 11/22/1985, SSN: 539-72-4816, Email: r.chen@startup.io, Phone: 415-555-0312. Emergency contact: Lisa Chen, 415-555-0987.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Robert Chen", "start": 20, "end": 31},
+      {"pii_type": "DATE_OF_BIRTH", "value": "11/22/1985", "start": 38, "end": 48},
+      {"pii_type": "SSN", "value": "539-72-4816", "start": 55, "end": 66},
+      {"pii_type": "EMAIL", "value": "r.chen@startup.io", "start": 75, "end": 93},
+      {"pii_type": "PHONE", "value": "415-555-0312", "start": 102, "end": 114},
+      {"pii_type": "NAME", "value": "Lisa Chen", "start": 136, "end": 145},
+      {"pii_type": "PHONE", "value": "415-555-0987", "start": 147, "end": 159}
+    ]
+  },
+  {
+    "id": "easy_05",
+    "document": "Customer support ticket #8842. Customer: Priya Sharma, Email: priya.sharma@mail.com, Phone: +91-98765-43210. Passport Number: J8274651. Issue: Account locked since 01/05/2026.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Priya Sharma", "start": 41, "end": 53},
+      {"pii_type": "EMAIL", "value": "priya.sharma@mail.com", "start": 62, "end": 83},
+      {"pii_type": "PHONE", "value": "+91-98765-43210", "start": 92, "end": 107},
+      {"pii_type": "PASSPORT", "value": "J8274651", "start": 126, "end": 134}
+    ]
+  },
+  {
+    "id": "easy_06",
+    "document": "Payment confirmation for David Lee. Card ending in 6789. Transaction amount: $2,450.00. Billing email: d.lee@company.net. Phone on file: 303-555-0456. SSN verified: 174-62-9385.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "David Lee", "start": 25, "end": 34},
+      {"pii_type": "EMAIL", "value": "d.lee@company.net", "start": 102, "end": 120},
+      {"pii_type": "PHONE", "value": "303-555-0456", "start": 137, "end": 149},
+      {"pii_type": "SSN", "value": "174-62-9385", "start": 165, "end": 176}
+    ]
+  },
+  {
+    "id": "easy_07",
+    "document": "HR File - Employee: Anita Patel, ID: EMP-7293, DOB: 06/30/1992, Email: anita.p@bigtech.com, SSN: 628-41-7053. Home: 2200 Pine Road, Seattle, WA 98101. Bank Account: 4521-0098-7612.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Anita Patel", "start": 21, "end": 32},
+      {"pii_type": "EMPLOYEE_ID", "value": "EMP-7293", "start": 38, "end": 46},
+      {"pii_type": "DATE_OF_BIRTH", "value": "06/30/1992", "start": 53, "end": 63},
+      {"pii_type": "EMAIL", "value": "anita.p@bigtech.com", "start": 72, "end": 91},
+      {"pii_type": "SSN", "value": "628-41-7053", "start": 98, "end": 109},
+      {"pii_type": "ADDRESS", "value": "2200 Pine Road, Seattle, WA 98101", "start": 117, "end": 150},
+      {"pii_type": "BANK_ACCOUNT", "value": "4521-0098-7612", "start": 167, "end": 181}
+    ]
+  },
+  {
+    "id": "easy_08",
+    "document": "Shipping label: To: Michael Brown, 567 Maple Drive, Portland, OR 97201. Phone: 503-555-0178. Email: m.brown@shop.com. Order placed by IP: 192.168.45.201.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Michael Brown", "start": 20, "end": 33},
+      {"pii_type": "ADDRESS", "value": "567 Maple Drive, Portland, OR 97201", "start": 35, "end": 70},
+      {"pii_type": "PHONE", "value": "503-555-0178", "start": 79, "end": 91},
+      {"pii_type": "EMAIL", "value": "m.brown@shop.com", "start": 100, "end": 116},
+      {"pii_type": "IP_ADDRESS", "value": "192.168.45.201", "start": 137, "end": 151}
+    ]
+  },
+  {
+    "id": "easy_09",
+    "document": "Insurance claim by Jennifer Wilson. Policy #INS-44821. DOB: 09/14/1978. SSN: 351-82-6094. Contact: jennifer.w@insurance.co, Mobile: 212-555-0893. Claim amount: $15,000.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Jennifer Wilson", "start": 20, "end": 35},
+      {"pii_type": "DATE_OF_BIRTH", "value": "09/14/1978", "start": 60, "end": 70},
+      {"pii_type": "SSN", "value": "351-82-6094", "start": 77, "end": 88},
+      {"pii_type": "EMAIL", "value": "jennifer.w@insurance.co", "start": 99, "end": 122},
+      {"pii_type": "PHONE", "value": "212-555-0893", "start": 132, "end": 144}
+    ]
+  },
+  {
+    "id": "easy_10",
+    "document": "Tax filing for: Raj Kapoor. SSN: 482-17-9305. Filing status: Single. Employer: TechVentures Inc. W2 wages: $95,400. Email: raj.kapoor@gmail.com. Phone: 628-555-0741. DOB: 02/28/1987.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Raj Kapoor", "start": 16, "end": 26},
+      {"pii_type": "SSN", "value": "482-17-9305", "start": 33, "end": 44},
+      {"pii_type": "SALARY", "value": "$95,400", "start": 107, "end": 114},
+      {"pii_type": "EMAIL", "value": "raj.kapoor@gmail.com", "start": 123, "end": 143},
+      {"pii_type": "PHONE", "value": "628-555-0741", "start": 152, "end": 164},
+      {"pii_type": "DATE_OF_BIRTH", "value": "02/28/1987", "start": 171, "end": 181}
+    ]
+  }
+]

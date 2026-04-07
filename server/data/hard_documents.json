@@ -1,0 +1,150 @@
+[
+  {
+    "id": "hard_01",
+    "document": "CONFIDENTIAL - TERMINATION NOTICE\n\nTo: Amit Sharma\nEmployee ID: EMP-29471\nDepartment: Engineering\nDate: March 15, 2026\n\nDear Amit,\n\nThis letter confirms the termination of your employment effective March 31, 2026. Your final salary of ₹18,50,000 will be processed to your HDFC Bank account ending in 4829. Your performance review scores of 2.1/5 for the last two quarters were below the minimum threshold.\n\nYour manager, Rajesh Kumar, and HR representative Sneha Patel (sneha.patel@company.com) have documented the performance improvement plan discussions. Please return your laptop and badge to the Whitefield office.\n\nYour health insurance (Policy #MED-88421) covering your pre-existing asthma condition will remain active until April 30, 2026. COBRA continuation details will be sent to your registered address at 42 Brigade Road, Bangalore 560025.\n\nContact HR at ext. 4421 or Sneha directly at 080-4555-0192 for any questions.\n\nSincerely,\nVP Human Resources",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Amit Sharma", "start": 39, "end": 50},
+      {"pii_type": "EMPLOYEE_ID", "value": "EMP-29471", "start": 65, "end": 74},
+      {"pii_type": "SALARY", "value": "₹18,50,000", "start": 231, "end": 241},
+      {"pii_type": "BANK_ACCOUNT", "value": "4829", "start": 289, "end": 293},
+      {"pii_type": "NAME", "value": "Rajesh Kumar", "start": 411, "end": 423},
+      {"pii_type": "NAME", "value": "Sneha Patel", "start": 448, "end": 459},
+      {"pii_type": "EMAIL", "value": "sneha.patel@company.com", "start": 461, "end": 484},
+      {"pii_type": "LOCATION", "value": "Whitefield", "start": 560, "end": 570},
+      {"pii_type": "MEDICAL_CONDITION", "value": "asthma", "start": 646, "end": 652},
+      {"pii_type": "ADDRESS", "value": "42 Brigade Road, Bangalore 560025", "start": 753, "end": 786},
+      {"pii_type": "PHONE", "value": "080-4555-0192", "start": 843, "end": 856}
+    ],
+    "expected_redacted": "CONFIDENTIAL - TERMINATION NOTICE\n\nTo: [NAME]\nEmployee ID: [EMPLOYEE_ID]\nDepartment: Engineering\nDate: March 15, 2026\n\nDear [NAME],\n\nThis letter confirms the termination of your employment effective March 31, 2026. Your final salary of [SALARY] will be processed to your HDFC Bank account ending in [BANK_ACCOUNT]. Your performance review scores of 2.1/5 for the last two quarters were below the minimum threshold.\n\nYour manager, [NAME], and HR representative [NAME] ([EMAIL]) have documented the performance improvement plan discussions. Please return your laptop and badge to the [LOCATION] office.\n\nYour health insurance (Policy #MED-88421) covering your pre-existing [MEDICAL_CONDITION] condition will remain active until April 30, 2026. COBRA continuation details will be sent to your registered address at [ADDRESS].\n\nContact HR at ext. 4421 or [NAME] directly at [PHONE] for any questions.\n\nSincerely,\nVP Human Resources",
+    "compliance_context": "DPDP Act 2023 (India) and internal data protection policy",
+    "expected_findings": [
+      {"value": "Amit Sharma", "pii_type": "NAME", "risk_level": "high", "regulation": "DPDP Section 4 - Consent", "recommended_action": "Ensure data principal consent for processing"},
+      {"value": "₹18,50,000", "pii_type": "SALARY", "risk_level": "high", "regulation": "DPDP Section 8(1) - Purpose Limitation", "recommended_action": "Restrict access to HR and payroll only"},
+      {"value": "asthma", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "DPDP Section 9 - Sensitive Personal Data", "recommended_action": "Must have explicit consent; encrypt at rest and in transit"},
+      {"value": "42 Brigade Road, Bangalore 560025", "pii_type": "ADDRESS", "risk_level": "medium", "regulation": "DPDP Section 8(1) - Purpose Limitation", "recommended_action": "Store only for legitimate business purpose; delete after separation"}
+    ]
+  },
+  {
+    "id": "hard_02",
+    "document": "PATIENT DISCHARGE SUMMARY\nFortis Hospital, Bangalore\nDate: February 20, 2026\n\nPatient: Kavitha Reddy, Age: 45, Female\nPatient ID: PAT-772901\nAdmission Date: February 14, 2026\n\nDiagnosis: Type 2 Diabetes Mellitus with diabetic retinopathy. Patient also has a history of clinical depression managed with Sertraline 50mg.\n\nTreatment: Insulin glargine 20 units daily, laser photocoagulation for retinopathy performed on Feb 16. Psychiatric consult by Dr. Meena Rao recommended continuing current medication.\n\nDischarge Medications: Insulin glargine, Metformin 1000mg, Sertraline 50mg, Aspirin 75mg.\n\nFollow-up: Ophthalmology appointment on March 5, 2026 with Dr. Suresh at the Indiranagar clinic. Psychiatry follow-up in 4 weeks.\n\nEmergency Contact: Husband - Venkat Reddy, Phone: 080-2555-0834. Residence: 18, 3rd Cross, HSR Layout, Bangalore 560102.\n\nInsurance: Star Health Policy #SH-4429017, covering self and spouse.\n\nAttending Physician: Dr. Arun Mathew, MD Internal Medicine\nSignature: _____________",
+    "ground_truth": [
+      {"pii_type": "ORGANIZATION", "value": "Fortis Hospital, Bangalore", "start": 27, "end": 53},
+      {"pii_type": "NAME", "value": "Kavitha Reddy", "start": 89, "end": 102},
+      {"pii_type": "AGE", "value": "45", "start": 109, "end": 111},
+      {"pii_type": "EMPLOYEE_ID", "value": "PAT-772901", "start": 128, "end": 138},
+      {"pii_type": "MEDICAL_CONDITION", "value": "Type 2 Diabetes Mellitus", "start": 181, "end": 205},
+      {"pii_type": "MEDICAL_CONDITION", "value": "diabetic retinopathy", "start": 211, "end": 231},
+      {"pii_type": "MEDICAL_CONDITION", "value": "clinical depression", "start": 261, "end": 280},
+      {"pii_type": "MEDICATION", "value": "Sertraline 50mg", "start": 294, "end": 309},
+      {"pii_type": "MEDICATION", "value": "Insulin glargine 20 units", "start": 323, "end": 348},
+      {"pii_type": "NAME", "value": "Dr. Meena Rao", "start": 441, "end": 454},
+      {"pii_type": "NAME", "value": "Dr. Suresh", "start": 622, "end": 632},
+      {"pii_type": "LOCATION", "value": "Indiranagar", "start": 640, "end": 651},
+      {"pii_type": "NAME", "value": "Venkat Reddy", "start": 710, "end": 722},
+      {"pii_type": "PHONE", "value": "080-2555-0834", "start": 731, "end": 744},
+      {"pii_type": "ADDRESS", "value": "18, 3rd Cross, HSR Layout, Bangalore 560102", "start": 757, "end": 801},
+      {"pii_type": "NAME", "value": "Dr. Arun Mathew", "start": 858, "end": 874}
+    ],
+    "expected_redacted": "PATIENT DISCHARGE SUMMARY\n[ORGANIZATION]\nDate: February 20, 2026\n\nPatient: [NAME], Age: [AGE], Female\nPatient ID: [EMPLOYEE_ID]\nAdmission Date: February 14, 2026\n\nDiagnosis: [MEDICAL_CONDITION] with [MEDICAL_CONDITION]. Patient also has a history of [MEDICAL_CONDITION] managed with [MEDICATION].\n\nTreatment: [MEDICATION] daily, laser photocoagulation for retinopathy performed on Feb 16. Psychiatric consult by [NAME] recommended continuing current medication.\n\nDischarge Medications: Insulin glargine, Metformin 1000mg, Sertraline 50mg, Aspirin 75mg.\n\nFollow-up: Ophthalmology appointment on March 5, 2026 with [NAME] at the [LOCATION] clinic. Psychiatry follow-up in 4 weeks.\n\nEmergency Contact: Husband - [NAME], Phone: [PHONE]. Residence: [ADDRESS].\n\nInsurance: Star Health Policy #SH-4429017, covering self and spouse.\n\nAttending Physician: [NAME], MD Internal Medicine\nSignature: _____________",
+    "compliance_context": "HIPAA (US healthcare standards) and DPDP Act 2023 (India)",
+    "expected_findings": [
+      {"value": "Kavitha Reddy", "pii_type": "NAME", "risk_level": "high", "regulation": "HIPAA §164.502 - Protected Health Information", "recommended_action": "PHI must be de-identified or accessed only by authorized personnel"},
+      {"value": "Type 2 Diabetes Mellitus", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "HIPAA §164.502 / DPDP Section 9", "recommended_action": "Encrypt all health records; restrict access to treating physicians"},
+      {"value": "clinical depression", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "HIPAA §164.502 - Psychotherapy notes", "recommended_action": "Requires separate authorization; higher protection than standard PHI"},
+      {"value": "18, 3rd Cross, HSR Layout, Bangalore 560102", "pii_type": "ADDRESS", "risk_level": "medium", "regulation": "DPDP Section 8(1)", "recommended_action": "Store with minimum retention; provide access only on need-to-know basis"}
+    ]
+  },
+  {
+    "id": "hard_03",
+    "document": "LEGAL MEMO - PRIVILEGED AND CONFIDENTIAL\nRe: Workplace Harassment Complaint - Case #HR-2026-0089\n\nComplainant: Nisha Verma, Senior Analyst, Finance Team\nEmployee ID: EMP-18823\nDate Filed: January 28, 2026\n\nMs. Verma reported that her direct supervisor, Karthik Menon (EMP-09412), made repeated unwanted advances between November 2025 and January 2026. Witnesses include team members Aditi Shah and Rohan Desai.\n\nDuring the investigation interview on Feb 3, Ms. Verma disclosed that the incidents worsened her existing PTSD condition, for which she sees Dr. Lakshmi Iyer at Mindspace Clinic, MG Road, Bangalore. She is currently on Paroxetine 20mg.\n\nMr. Menon resides at 55 Cunningham Road, Bangalore 560052. His personal email is k.menon.personal@gmail.com and phone is 99800-12345.\n\nMs. Verma's contact: nisha.v@company.com, personal: nisha.verma92@outlook.com. She lives at Flat 204, Prestige Lakeside, Whitefield, Bangalore 560066.\n\nRecommendation: Immediate suspension of Mr. Menon pending full investigation. Offer Ms. Verma paid medical leave and EAP counseling.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Nisha Verma", "start": 114, "end": 125},
+      {"pii_type": "EMPLOYEE_ID", "value": "EMP-18823", "start": 162, "end": 171},
+      {"pii_type": "NAME", "value": "Karthik Menon", "start": 255, "end": 268},
+      {"pii_type": "EMPLOYEE_ID", "value": "EMP-09412", "start": 270, "end": 279},
+      {"pii_type": "NAME", "value": "Aditi Shah", "start": 366, "end": 376},
+      {"pii_type": "NAME", "value": "Rohan Desai", "start": 381, "end": 392},
+      {"pii_type": "MEDICAL_CONDITION", "value": "PTSD", "start": 502, "end": 506},
+      {"pii_type": "NAME", "value": "Dr. Lakshmi Iyer", "start": 536, "end": 552},
+      {"pii_type": "LOCATION", "value": "MG Road, Bangalore", "start": 571, "end": 589},
+      {"pii_type": "MEDICATION", "value": "Paroxetine 20mg", "start": 614, "end": 629},
+      {"pii_type": "ADDRESS", "value": "55 Cunningham Road, Bangalore 560052", "start": 656, "end": 692},
+      {"pii_type": "EMAIL", "value": "k.menon.personal@gmail.com", "start": 713, "end": 739},
+      {"pii_type": "PHONE", "value": "99800-12345", "start": 753, "end": 764},
+      {"pii_type": "EMAIL", "value": "nisha.v@company.com", "start": 790, "end": 809},
+      {"pii_type": "EMAIL", "value": "nisha.verma92@outlook.com", "start": 821, "end": 846},
+      {"pii_type": "ADDRESS", "value": "Flat 204, Prestige Lakeside, Whitefield, Bangalore 560066", "start": 861, "end": 919}
+    ],
+    "expected_redacted": "LEGAL MEMO - PRIVILEGED AND CONFIDENTIAL\nRe: Workplace Harassment Complaint - Case #HR-2026-0089\n\nComplainant: [NAME], Senior Analyst, Finance Team\nEmployee ID: [EMPLOYEE_ID]\nDate Filed: January 28, 2026\n\nMs. [NAME] reported that her direct supervisor, [NAME] ([EMPLOYEE_ID]), made repeated unwanted advances between November 2025 and January 2026. Witnesses include team members [NAME] and [NAME].\n\nDuring the investigation interview on Feb 3, Ms. [NAME] disclosed that the incidents worsened her existing [MEDICAL_CONDITION] condition, for which she sees [NAME] at Mindspace Clinic, [LOCATION]. She is currently on [MEDICATION].\n\nMr. [NAME] resides at [ADDRESS]. His personal email is [EMAIL] and phone is [PHONE].\n\nMs. [NAME]'s contact: [EMAIL], personal: [EMAIL]. She lives at [ADDRESS].\n\nRecommendation: Immediate suspension of Mr. [NAME] pending full investigation. Offer Ms. [NAME] paid medical leave and EAP counseling.",
+    "compliance_context": "DPDP Act 2023 (India), POSH Act 2013, and GDPR (if data shared with EU offices)",
+    "expected_findings": [
+      {"value": "Nisha Verma", "pii_type": "NAME", "risk_level": "critical", "regulation": "POSH Act Section 16 - Confidentiality", "recommended_action": "Complainant identity must be strictly protected; limit access to IC members only"},
+      {"value": "PTSD", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "DPDP Section 9 - Sensitive Personal Data", "recommended_action": "Health data requires explicit consent; store separately from HR records"},
+      {"value": "k.menon.personal@gmail.com", "pii_type": "EMAIL", "risk_level": "high", "regulation": "DPDP Section 6 - Data Minimization", "recommended_action": "Personal email not needed for investigation; collect only work email"},
+      {"value": "Flat 204, Prestige Lakeside, Whitefield, Bangalore 560066", "pii_type": "ADDRESS", "risk_level": "high", "regulation": "DPDP Section 8(1) - Purpose Limitation", "recommended_action": "Home address not relevant to harassment investigation; do not retain"}
+    ]
+  },
+  {
+    "id": "hard_04",
+    "document": "INSURANCE CLAIM INVESTIGATION REPORT\nClaim #: INS-2026-44821\nDate: March 1, 2026\n\nClaimant: Arjun Nair, Age 38, Male\nPolicy: LIC Jeevan Anand #94821-A, Premium: ₹24,000/year\n\nMr. Nair filed a claim for hospitalization at Manipal Hospital on Feb 10, 2026 for acute pancreatitis. Medical records indicate a history of alcohol dependency (noted in Dr. Srinivas's records from 2023).\n\nClaimant's Details:\n- Address: 12, 2nd Main, Indiranagar, Bangalore 560038\n- Phone: 98451-67890\n- Email: arjun.nair@personal.in\n- Aadhaar: 4523 8901 2367 (verified)\n- PAN: ABCPN1234F\n\nSpouse: Divya Nair, nominated beneficiary. Her Aadhaar: 7891 2345 6780.\n\nInvestigator Notes: Visited claimant's residence. Neighbor Mrs. Padma confirmed Mr. Nair was hospitalized. Hospital billing shows ₹3,45,000 in expenses. Dr. Priya Menon (Manipal Hospital) confirmed diagnosis.\n\nRecommendation: Approve claim. No evidence of fraud.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Arjun Nair", "start": 94, "end": 104},
+      {"pii_type": "AGE", "value": "38", "start": 110, "end": 112},
+      {"pii_type": "SALARY", "value": "₹24,000/year", "start": 160, "end": 173},
+      {"pii_type": "ORGANIZATION", "value": "Manipal Hospital", "start": 222, "end": 238},
+      {"pii_type": "MEDICAL_CONDITION", "value": "acute pancreatitis", "start": 258, "end": 276},
+      {"pii_type": "MEDICAL_CONDITION", "value": "alcohol dependency", "start": 310, "end": 328},
+      {"pii_type": "NAME", "value": "Dr. Srinivas", "start": 340, "end": 352},
+      {"pii_type": "ADDRESS", "value": "12, 2nd Main, Indiranagar, Bangalore 560038", "start": 394, "end": 437},
+      {"pii_type": "PHONE", "value": "98451-67890", "start": 447, "end": 458},
+      {"pii_type": "EMAIL", "value": "arjun.nair@personal.in", "start": 468, "end": 490},
+      {"pii_type": "SSN", "value": "4523 8901 2367", "start": 502, "end": 516},
+      {"pii_type": "LICENSE_NUMBER", "value": "ABCPN1234F", "start": 531, "end": 541},
+      {"pii_type": "NAME", "value": "Divya Nair", "start": 552, "end": 562},
+      {"pii_type": "SSN", "value": "7891 2345 6780", "start": 589, "end": 603},
+      {"pii_type": "NAME", "value": "Mrs. Padma", "start": 654, "end": 664},
+      {"pii_type": "NAME", "value": "Dr. Priya Menon", "start": 729, "end": 744}
+    ],
+    "expected_redacted": "INSURANCE CLAIM INVESTIGATION REPORT\nClaim #: INS-2026-44821\nDate: March 1, 2026\n\nClaimant: [NAME], Age [AGE], Male\nPolicy: LIC Jeevan Anand #94821-A, Premium: [SALARY]\n\nMr. [NAME] filed a claim for hospitalization at [ORGANIZATION] on Feb 10, 2026 for [MEDICAL_CONDITION]. Medical records indicate a history of [MEDICAL_CONDITION] (noted in [NAME]'s records from 2023).\n\nClaimant's Details:\n- Address: [ADDRESS]\n- Phone: [PHONE]\n- Email: [EMAIL]\n- Aadhaar: [SSN] (verified)\n- PAN: [LICENSE_NUMBER]\n\nSpouse: [NAME], nominated beneficiary. Her Aadhaar: [SSN].\n\nInvestigator Notes: Visited claimant's residence. Neighbor [NAME] confirmed Mr. [NAME] was hospitalized. Hospital billing shows ₹3,45,000 in expenses. [NAME] ([ORGANIZATION]) confirmed diagnosis.\n\nRecommendation: Approve claim. No evidence of fraud.",
+    "compliance_context": "DPDP Act 2023 (India), IRDAI Guidelines, and Insurance Act 1938",
+    "expected_findings": [
+      {"value": "4523 8901 2367", "pii_type": "SSN", "risk_level": "critical", "regulation": "DPDP Section 9 / Aadhaar Act Section 29", "recommended_action": "Aadhaar numbers must be masked; store only last 4 digits"},
+      {"value": "alcohol dependency", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "DPDP Section 9 - Sensitive Personal Data", "recommended_action": "Health data requires explicit consent; do not share with third parties"},
+      {"value": "ABCPN1234F", "pii_type": "LICENSE_NUMBER", "risk_level": "high", "regulation": "DPDP Section 6 - Data Minimization", "recommended_action": "PAN should be partially masked; retain only for tax compliance"},
+      {"value": "Mrs. Padma", "pii_type": "NAME", "risk_level": "medium", "regulation": "DPDP Section 4 - Third Party Consent", "recommended_action": "Third-party witness name collected without their consent; anonymize in report"}
+    ]
+  },
+  {
+    "id": "hard_05",
+    "document": "SCHOOL RECORDS - CONFIDENTIAL\nDelhi Public School, Whitefield\nAcademic Year 2025-2026\n\nStudent: Aarav Krishnamurthy, Class 8-B, Roll No: 42\nDate of Birth: July 15, 2012\nAadhaar: 5678 1234 9012\n\nParent/Guardian:\nFather: Suresh Krishnamurthy, IT Manager at Wipro, Phone: 99012-34567\nMother: Lakshmi Krishnamurthy, Homemaker, Phone: 99012-34568\nResidence: Villa 18, Prestige Ozone, Whitefield, Bangalore 560066\n\nMedical Record:\n- Diagnosed with ADHD (Attention Deficit Hyperactivity Disorder) in 2023\n- Currently on Methylphenidate 10mg (prescribed by Dr. Raghav Sharma, NIMHANS)\n- Mild peanut allergy (carries EpiPen)\n- Blood Group: B+\n\nCounselor Notes: Aarav has shown improvement in focus but struggles socially. Parents requested confidentiality about ADHD diagnosis from other parents. Class teacher Mrs. Sunitha Rao is informed.\n\nEmergency Contact: Uncle - Mahesh Krishnamurthy, 98765-43210, lives nearby in ITPL area.",
+    "ground_truth": [
+      {"pii_type": "ORGANIZATION", "value": "Delhi Public School, Whitefield", "start": 31, "end": 62},
+      {"pii_type": "NAME", "value": "Aarav Krishnamurthy", "start": 99, "end": 118},
+      {"pii_type": "DATE_OF_BIRTH", "value": "July 15, 2012", "start": 145, "end": 158},
+      {"pii_type": "SSN", "value": "5678 1234 9012", "start": 169, "end": 183},
+      {"pii_type": "NAME", "value": "Suresh Krishnamurthy", "start": 204, "end": 224},
+      {"pii_type": "ORGANIZATION", "value": "Wipro", "start": 240, "end": 245},
+      {"pii_type": "PHONE", "value": "99012-34567", "start": 254, "end": 265},
+      {"pii_type": "NAME", "value": "Lakshmi Krishnamurthy", "start": 275, "end": 296},
+      {"pii_type": "PHONE", "value": "99012-34568", "start": 317, "end": 328},
+      {"pii_type": "ADDRESS", "value": "Villa 18, Prestige Ozone, Whitefield, Bangalore 560066", "start": 341, "end": 395},
+      {"pii_type": "MEDICAL_CONDITION", "value": "ADHD (Attention Deficit Hyperactivity Disorder)", "start": 432, "end": 479},
+      {"pii_type": "MEDICATION", "value": "Methylphenidate 10mg", "start": 510, "end": 530},
+      {"pii_type": "NAME", "value": "Dr. Raghav Sharma", "start": 546, "end": 563},
+      {"pii_type": "ORGANIZATION", "value": "NIMHANS", "start": 565, "end": 572},
+      {"pii_type": "MEDICAL_CONDITION", "value": "peanut allergy", "start": 581, "end": 595},
+      {"pii_type": "NAME", "value": "Mrs. Sunitha Rao", "start": 783, "end": 799},
+      {"pii_type": "NAME", "value": "Mahesh Krishnamurthy", "start": 832, "end": 852},
+      {"pii_type": "PHONE", "value": "98765-43210", "start": 854, "end": 865},
+      {"pii_type": "LOCATION", "value": "ITPL", "start": 883, "end": 887}
+    ],
+    "expected_redacted": "SCHOOL RECORDS - CONFIDENTIAL\n[ORGANIZATION]\nAcademic Year 2025-2026\n\nStudent: [NAME], Class 8-B, Roll No: 42\nDate of Birth: [DATE_OF_BIRTH]\nAadhaar: [SSN]\n\nParent/Guardian:\nFather: [NAME], IT Manager at [ORGANIZATION], Phone: [PHONE]\nMother: [NAME], Homemaker, Phone: [PHONE]\nResidence: [ADDRESS]\n\nMedical Record:\n- Diagnosed with [MEDICAL_CONDITION] in 2023\n- Currently on [MEDICATION] (prescribed by [NAME], [ORGANIZATION])\n- Mild [MEDICAL_CONDITION] (carries EpiPen)\n- Blood Group: B+\n\nCounselor Notes: [NAME] has shown improvement in focus but struggles socially. Parents requested confidentiality about [MEDICAL_CONDITION] diagnosis from other parents. Class teacher [NAME] is informed.\n\nEmergency Contact: Uncle - [NAME], [PHONE], lives nearby in [LOCATION] area.",
+    "compliance_context": "DPDP Act 2023 (India) - Special provisions for children's data, Right to Education Act, and POCSO Act",
+    "expected_findings": [
+      {"value": "Aarav Krishnamurthy", "pii_type": "NAME", "risk_level": "critical", "regulation": "DPDP Section 9(1) - Children's Data", "recommended_action": "Processing children's data requires verifiable parental consent; must not cause harm to the child"},
+      {"value": "ADHD (Attention Deficit Hyperactivity Disorder)", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "DPDP Section 9 - Sensitive Data / RTE Act", "recommended_action": "Child's medical diagnosis must be strictly confidential; share only with authorized school staff"},
+      {"value": "5678 1234 9012", "pii_type": "SSN", "risk_level": "critical", "regulation": "Aadhaar Act Section 29 / DPDP Section 9(1)", "recommended_action": "Minor's Aadhaar must never be displayed in full; mask all but last 4 digits"},
+      {"value": "Methylphenidate 10mg", "pii_type": "MEDICATION", "risk_level": "high", "regulation": "DPDP Section 9 - Sensitive Personal Data", "recommended_action": "Controlled substance prescription for minor; restrict access to school nurse only"}
+    ]
+  }
+]

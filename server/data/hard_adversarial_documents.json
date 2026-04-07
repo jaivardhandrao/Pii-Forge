@@ -1,0 +1,104 @@
+[
+  {
+    "id": "hadv_01",
+    "document": "REDACTED HR Document: [NAME] (Employee ID: [EMPLOYEE_ID]) has been terminated effective 15-March-2026. His manager Rajesh Verma approved the decision. Reason: repeated policy violations. [NAME]'s final settlement of Rs. 3,45,000 will be credited to his HDFC account. Exit interview notes mention that the employee was diagnosed with bipolar disorder last year. Contact HR at hr@acmecorp.com for queries.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Rajesh Verma", "start": 82, "end": 94},
+      {"pii_type": "SALARY", "value": "Rs. 3,45,000", "start": 173, "end": 185},
+      {"pii_type": "ORGANIZATION", "value": "HDFC", "start": 213, "end": 217},
+      {"pii_type": "MEDICAL_CONDITION", "value": "bipolar disorder", "start": 305, "end": 321},
+      {"pii_type": "EMAIL", "value": "hr@acmecorp.com", "start": 349, "end": 364}
+    ],
+    "expected_redacted": "[NAME] (Employee ID: [EMPLOYEE_ID]) has been terminated effective 15-March-2026. His manager [NAME] approved the decision. Reason: repeated policy violations. [NAME]'s final settlement of [SALARY] will be credited to his [ORGANIZATION] account. Exit interview notes mention that the employee was diagnosed with [MEDICAL_CONDITION] last year. Contact HR at [EMAIL] for queries.",
+    "compliance_context": "DPDP Act 2023, GDPR",
+    "expected_findings": [
+      {"value": "Rajesh Verma", "pii_type": "NAME", "risk_level": "high", "regulation": "DPDP Section 8(1)", "recommended_action": "Manager name should have been redacted — it links to the terminated employee's identity"},
+      {"value": "Rs. 3,45,000", "pii_type": "SALARY", "risk_level": "high", "regulation": "DPDP Section 4", "recommended_action": "Financial settlement amount must be redacted in shared documents"},
+      {"value": "bipolar disorder", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "DPDP Section 9, GDPR Art.9", "recommended_action": "Sensitive health data left unredacted — this is a critical compliance failure"},
+      {"value": "hr@acmecorp.com", "pii_type": "EMAIL", "risk_level": "medium", "regulation": "GDPR Art.6", "recommended_action": "Corporate email reveals the organization — consider redacting in sensitive contexts"}
+    ]
+  },
+  {
+    "id": "hadv_02",
+    "document": "Patient Discharge Summary (REDACTED): Patient [NAME], age [AGE], was discharged from [ORGANIZATION] on 28-Feb-2026. Attending physician: Dr. Sunita Rao. Diagnosis: Type 2 diabetes with peripheral neuropathy. Prescribed medications: Insulin Glargine 20 units, Gabapentin 300mg. Patient's daughter Kavya (phone: 080-4555-7721) is the primary caregiver. Follow-up at the Jayanagar branch in 2 weeks. Insurance ID: [EMPLOYEE_ID].",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Dr. Sunita Rao", "start": 131, "end": 145},
+      {"pii_type": "MEDICAL_CONDITION", "value": "Type 2 diabetes with peripheral neuropathy", "start": 158, "end": 200},
+      {"pii_type": "MEDICATION", "value": "Insulin Glargine 20 units", "start": 226, "end": 251},
+      {"pii_type": "MEDICATION", "value": "Gabapentin 300mg", "start": 253, "end": 269},
+      {"pii_type": "NAME", "value": "Kavya", "start": 293, "end": 298},
+      {"pii_type": "PHONE", "value": "080-4555-7721", "start": 307, "end": 320},
+      {"pii_type": "LOCATION", "value": "Jayanagar", "start": 365, "end": 374}
+    ],
+    "expected_redacted": "Patient [NAME], age [AGE], was discharged from [ORGANIZATION] on 28-Feb-2026. Attending physician: [NAME]. Diagnosis: [MEDICAL_CONDITION]. Prescribed medications: [MEDICATION], [MEDICATION]. Patient's daughter [NAME] (phone: [PHONE]) is the primary caregiver. Follow-up at the [LOCATION] branch in 2 weeks. Insurance ID: [EMPLOYEE_ID].",
+    "compliance_context": "HIPAA, DPDP Act 2023",
+    "expected_findings": [
+      {"value": "Dr. Sunita Rao", "pii_type": "NAME", "risk_level": "high", "regulation": "HIPAA §164.502", "recommended_action": "Physician name should be redacted — links to specific patient case"},
+      {"value": "Type 2 diabetes with peripheral neuropathy", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "HIPAA §164.502, DPDP Section 9", "recommended_action": "Diagnosis left completely unredacted — critical HIPAA violation"},
+      {"value": "Kavya", "pii_type": "NAME", "risk_level": "high", "regulation": "DPDP Section 8(1)", "recommended_action": "Family member name left exposed — identifies the patient indirectly"},
+      {"value": "080-4555-7721", "pii_type": "PHONE", "risk_level": "high", "regulation": "DPDP Section 4", "recommended_action": "Phone number of caregiver completely unredacted"}
+    ]
+  },
+  {
+    "id": "hadv_03",
+    "document": "REDACTED Legal Memo — Workplace Harassment Case #WH-2026-044: Complainant: [NAME] (Dept: Marketing). Respondent: Vikram Sinha, Senior VP Operations. The complainant alleges repeated unwanted advances between Oct-Dec 2025. Witness statements from Priya Menon and Arjun Das corroborate the timeline. The complainant has been on medical leave since January for PTSD. [NAME] resides at 42 MG Road, Indiranagar, Bangalore 560038.",
+    "ground_truth": [
+      {"pii_type": "EMPLOYEE_ID", "value": "WH-2026-044", "start": 53, "end": 64},
+      {"pii_type": "NAME", "value": "Vikram Sinha", "start": 99, "end": 111},
+      {"pii_type": "NAME", "value": "Priya Menon", "start": 220, "end": 231},
+      {"pii_type": "NAME", "value": "Arjun Das", "start": 236, "end": 245},
+      {"pii_type": "MEDICAL_CONDITION", "value": "PTSD", "start": 341, "end": 345},
+      {"pii_type": "ADDRESS", "value": "42 MG Road, Indiranagar, Bangalore 560038", "start": 367, "end": 408}
+    ],
+    "expected_redacted": "REDACTED Legal Memo — Workplace Harassment Case #[EMPLOYEE_ID]: Complainant: [NAME] (Dept: Marketing). Respondent: [NAME], Senior VP Operations. The complainant alleges repeated unwanted advances between Oct-Dec 2025. Witness statements from [NAME] and [NAME] corroborate the timeline. The complainant has been on medical leave since January for [MEDICAL_CONDITION]. [NAME] resides at [ADDRESS].",
+    "compliance_context": "DPDP Act 2023, POSH Act 2013, GDPR",
+    "expected_findings": [
+      {"value": "Vikram Sinha", "pii_type": "NAME", "risk_level": "critical", "regulation": "POSH Act Section 16, DPDP Section 8", "recommended_action": "Respondent name in harassment case must be redacted — critical failure under POSH confidentiality requirements"},
+      {"value": "Priya Menon", "pii_type": "NAME", "risk_level": "high", "regulation": "POSH Act Section 16", "recommended_action": "Witness names must be protected under POSH Act confidentiality provisions"},
+      {"value": "PTSD", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "DPDP Section 9, GDPR Art.9", "recommended_action": "Health condition linked to harassment case left exposed — sensitive health data violation"},
+      {"value": "42 MG Road, Indiranagar, Bangalore 560038", "pii_type": "ADDRESS", "risk_level": "high", "regulation": "DPDP Section 4", "recommended_action": "Full residential address of complainant left unredacted — enables physical identification"}
+    ]
+  },
+  {
+    "id": "hadv_04",
+    "document": "Insurance Claim (REDACTED): Claim ref [EMPLOYEE_ID]. Policyholder: [NAME], Aadhaar: [SSN]. Claim for: hospitalization at Fortis Hospital, Bangalore, from 10-15 Dec 2025. Diagnosis: acute liver failure secondary to chronic alcohol dependency. Total bill: Rs. 8,72,000. Nominee: wife Anita Kapoor, phone 99800-45612. Policy number: LIC-HLTH-2022-88412. Pre-existing condition: hypertension (disclosed at enrollment).",
+    "ground_truth": [
+      {"pii_type": "ORGANIZATION", "value": "Fortis Hospital, Bangalore", "start": 103, "end": 129},
+      {"pii_type": "MEDICAL_CONDITION", "value": "acute liver failure secondary to chronic alcohol dependency", "start": 162, "end": 220},
+      {"pii_type": "SALARY", "value": "Rs. 8,72,000", "start": 234, "end": 246},
+      {"pii_type": "NAME", "value": "Anita Kapoor", "start": 265, "end": 277},
+      {"pii_type": "PHONE", "value": "99800-45612", "start": 285, "end": 296},
+      {"pii_type": "EMPLOYEE_ID", "value": "LIC-HLTH-2022-88412", "start": 313, "end": 333},
+      {"pii_type": "MEDICAL_CONDITION", "value": "hypertension", "start": 360, "end": 372}
+    ],
+    "expected_redacted": "Insurance Claim (REDACTED): Claim ref [EMPLOYEE_ID]. Policyholder: [NAME], Aadhaar: [SSN]. Claim for: hospitalization at [ORGANIZATION], from 10-15 Dec 2025. Diagnosis: [MEDICAL_CONDITION]. Total bill: [SALARY]. Nominee: wife [NAME], phone [PHONE]. Policy number: [EMPLOYEE_ID]. Pre-existing condition: [MEDICAL_CONDITION] (disclosed at enrollment).",
+    "compliance_context": "DPDP Act 2023, IRDAI regulations, Insurance Act 1938",
+    "expected_findings": [
+      {"value": "acute liver failure secondary to chronic alcohol dependency", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "DPDP Section 9, HIPAA", "recommended_action": "Highly sensitive diagnosis left fully exposed — alcohol dependency is stigmatizing medical data"},
+      {"value": "Anita Kapoor", "pii_type": "NAME", "risk_level": "high", "regulation": "DPDP Section 8(1)", "recommended_action": "Nominee/spouse name left unredacted — identifies the policyholder indirectly"},
+      {"value": "99800-45612", "pii_type": "PHONE", "risk_level": "high", "regulation": "DPDP Section 4", "recommended_action": "Phone number of nominee completely exposed"},
+      {"value": "LIC-HLTH-2022-88412", "pii_type": "EMPLOYEE_ID", "risk_level": "high", "regulation": "IRDAI Guidelines", "recommended_action": "Full policy number left unredacted — can be used to access complete claim history"}
+    ]
+  },
+  {
+    "id": "hadv_05",
+    "document": "School Records (REDACTED): Student [NAME], Class 8, Section B, Roll No. 23. Parent: [NAME], contact: [PHONE]. The student has been diagnosed with ADHD and is currently on Methylphenidate 10mg (administered by school nurse). Academic performance: below average. Behavioral notes: frequent outbursts, referred to counselor Dr. Meena Shah at KidsMind Clinic, JP Nagar. Student's Aadhaar: XXXX-XXXX-5523. Home address: [ADDRESS].",
+    "ground_truth": [
+      {"pii_type": "EMPLOYEE_ID", "value": "23", "start": 72, "end": 74},
+      {"pii_type": "MEDICAL_CONDITION", "value": "ADHD", "start": 147, "end": 151},
+      {"pii_type": "MEDICATION", "value": "Methylphenidate 10mg", "start": 176, "end": 196},
+      {"pii_type": "NAME", "value": "Dr. Meena Shah", "start": 311, "end": 325},
+      {"pii_type": "ORGANIZATION", "value": "KidsMind Clinic", "start": 329, "end": 344},
+      {"pii_type": "LOCATION", "value": "JP Nagar", "start": 346, "end": 354},
+      {"pii_type": "PASSPORT", "value": "XXXX-XXXX-5523", "start": 376, "end": 390}
+    ],
+    "expected_redacted": "School Records (REDACTED): Student [NAME], Class 8, Section B, Roll No. [EMPLOYEE_ID]. Parent: [NAME], contact: [PHONE]. The student has been diagnosed with [MEDICAL_CONDITION] and is currently on [MEDICATION] (administered by school nurse). Academic performance: below average. Behavioral notes: frequent outbursts, referred to counselor [NAME] at [ORGANIZATION], [LOCATION]. Student's Aadhaar: [PASSPORT]. Home address: [ADDRESS].",
+    "compliance_context": "DPDP Act 2023 Section 9(1), POCSO Act, Right to Education Act",
+    "expected_findings": [
+      {"value": "ADHD", "pii_type": "MEDICAL_CONDITION", "risk_level": "critical", "regulation": "DPDP Section 9(1)", "recommended_action": "Child's medical diagnosis left exposed — children's sensitive data requires highest protection under DPDP"},
+      {"value": "Methylphenidate 10mg", "pii_type": "MEDICATION", "risk_level": "critical", "regulation": "DPDP Section 9(1), POCSO Act", "recommended_action": "Controlled substance prescribed to a minor left unredacted — critical failure for children's data protection"},
+      {"value": "Dr. Meena Shah", "pii_type": "NAME", "risk_level": "high", "regulation": "DPDP Section 8", "recommended_action": "Counselor name reveals the child is receiving mental health treatment"},
+      {"value": "XXXX-XXXX-5523", "pii_type": "PASSPORT", "risk_level": "critical", "regulation": "Aadhaar Act Section 29, DPDP Section 9(1)", "recommended_action": "Partial Aadhaar number of a minor left exposed — even partial biometric IDs of children must be fully redacted"}
+    ]
+  }
+]

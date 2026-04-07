@@ -1,0 +1,68 @@
+[
+  {
+    "id": "mctx_01",
+    "document": "Hey team, just spoke with the patient in Room 4B \u2014 Ramesh Gupta, age 34, diabetic since 2019. He was referred by Dr. Ananya Krishnan from Apollo Hospital Chennai. His wife Priya can be reached at their Koramangala residence if anything comes up.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Ramesh Gupta", "start": 52, "end": 64},
+      {"pii_type": "AGE", "value": "34", "start": 70, "end": 72},
+      {"pii_type": "MEDICAL_CONDITION", "value": "diabetic since 2019", "start": 74, "end": 93},
+      {"pii_type": "NAME", "value": "Dr. Ananya Krishnan", "start": 114, "end": 133},
+      {"pii_type": "ORGANIZATION", "value": "Apollo Hospital Chennai", "start": 139, "end": 162},
+      {"pii_type": "NAME", "value": "Priya", "start": 174, "end": 179},
+      {"pii_type": "LOCATION", "value": "Koramangala", "start": 204, "end": 215}
+    ]
+  },
+  {
+    "id": "mctx_02",
+    "document": "Meeting notes 03/12/2026: Discussed performance issues with senior developer Alex Thompson. He mentioned he's been dealing with anxiety and requested a lighter workload. His manager Karen Wu approved two weeks remote from his home in Palo Alto. Alex's employee portal username is athompson42.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Alex Thompson", "start": 72, "end": 85},
+      {"pii_type": "MEDICAL_CONDITION", "value": "anxiety", "start": 120, "end": 127},
+      {"pii_type": "NAME", "value": "Karen Wu", "start": 170, "end": 178},
+      {"pii_type": "LOCATION", "value": "Palo Alto", "start": 222, "end": 231},
+      {"pii_type": "USERNAME", "value": "athompson42", "start": 276, "end": 287}
+    ]
+  },
+  {
+    "id": "mctx_03",
+    "document": "Dr. Patel's clinical notes: Mrs. Lakshmi Iyer, female, mid-fifties, presented with Stage 2 hypertension and elevated cholesterol. Currently on Metformin 500mg for pre-diabetes. Patient resides near Jayanagar 4th Block. Daughter Meera is the emergency contact \u2014 she works at Infosys Electronic City campus.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Dr. Patel", "start": 0, "end": 9},
+      {"pii_type": "NAME", "value": "Mrs. Lakshmi Iyer", "start": 28, "end": 46},
+      {"pii_type": "AGE", "value": "mid-fifties", "start": 56, "end": 67},
+      {"pii_type": "MEDICAL_CONDITION", "value": "Stage 2 hypertension", "start": 84, "end": 104},
+      {"pii_type": "MEDICAL_CONDITION", "value": "elevated cholesterol", "start": 109, "end": 129},
+      {"pii_type": "MEDICATION", "value": "Metformin 500mg", "start": 145, "end": 160},
+      {"pii_type": "MEDICAL_CONDITION", "value": "pre-diabetes", "start": 165, "end": 177},
+      {"pii_type": "LOCATION", "value": "Jayanagar 4th Block", "start": 201, "end": 220},
+      {"pii_type": "NAME", "value": "Meera", "start": 232, "end": 237},
+      {"pii_type": "ORGANIZATION", "value": "Infosys Electronic City", "start": 274, "end": 297}
+    ]
+  },
+  {
+    "id": "mctx_04",
+    "document": "Incident report: On Tuesday evening, warehouse worker Miguel Torres, employee since 2018, slipped on wet floor in Section C. He sustained a fractured wrist and mild concussion. Miguel is 28, lives with his family in East Oakland. Supervisor Tom Bradley filed the report. Workers' comp claim initiated.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Miguel Torres", "start": 55, "end": 68},
+      {"pii_type": "MEDICAL_CONDITION", "value": "fractured wrist", "start": 139, "end": 154},
+      {"pii_type": "MEDICAL_CONDITION", "value": "mild concussion", "start": 159, "end": 174},
+      {"pii_type": "AGE", "value": "28", "start": 186, "end": 188},
+      {"pii_type": "LOCATION", "value": "East Oakland", "start": 218, "end": 230},
+      {"pii_type": "NAME", "value": "Tom Bradley", "start": 243, "end": 254}
+    ]
+  },
+  {
+    "id": "mctx_05",
+    "document": "Therapy session notes: Patient ID CLN-4492, female college student, 20 years old, referred for depression and eating disorder. She mentioned her roommate Aisha knows about her condition. Patient is from Pune, currently studying at MIT Manipal. Father is a surgeon at Manipal Hospital.",
+    "ground_truth": [
+      {"pii_type": "EMPLOYEE_ID", "value": "CLN-4492", "start": 33, "end": 41},
+      {"pii_type": "AGE", "value": "20 years old", "start": 68, "end": 80},
+      {"pii_type": "MEDICAL_CONDITION", "value": "depression", "start": 95, "end": 105},
+      {"pii_type": "MEDICAL_CONDITION", "value": "eating disorder", "start": 110, "end": 125},
+      {"pii_type": "NAME", "value": "Aisha", "start": 157, "end": 162},
+      {"pii_type": "LOCATION", "value": "Pune", "start": 204, "end": 208},
+      {"pii_type": "ORGANIZATION", "value": "MIT Manipal", "start": 232, "end": 243},
+      {"pii_type": "ORGANIZATION", "value": "Manipal Hospital", "start": 266, "end": 282}
+    ]
+  }
+]

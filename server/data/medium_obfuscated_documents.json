@@ -1,0 +1,62 @@
+[
+  {
+    "id": "mobs_01",
+    "document": "Forwarded complaint: The customer said \u2014 and I quote \u2014 'my name is Priya dot Sharma at gmail dot com and I have been waiting since forever.' She also gave her number as four-zero-eight, five-five-five, zero-one-two-three. Her son Rohan, a minor aged 12, was the one originally affected. They live somewhere in Indiranagar.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Priya", "start": 67, "end": 72},
+      {"pii_type": "EMAIL", "value": "Priya dot Sharma at gmail dot com", "start": 67, "end": 100},
+      {"pii_type": "PHONE", "value": "four-zero-eight, five-five-five, zero-one-two-three", "start": 170, "end": 221},
+      {"pii_type": "NAME", "value": "Rohan", "start": 232, "end": 237},
+      {"pii_type": "AGE", "value": "12", "start": 253, "end": 255},
+      {"pii_type": "LOCATION", "value": "Indiranagar", "start": 309, "end": 320}
+    ]
+  },
+  {
+    "id": "mobs_02",
+    "document": "Audit trail: User logged in from IP one-ninety-two dot one-sixty-eight dot one dot forty-five at 03:14 AM. Account holder: K***a M***i (partially masked in logs). System flagged transaction of Rs. 2,50,000 to account ending 4829. The KYC document showed Aadhaar number XXXX-XXXX-7834. User's registered mobile: +91-98XXX-XX210.",
+    "ground_truth": [
+      {"pii_type": "IP_ADDRESS", "value": "one-ninety-two dot one-sixty-eight dot one dot forty-five", "start": 31, "end": 88},
+      {"pii_type": "NAME", "value": "K***a M***i", "start": 119, "end": 130},
+      {"pii_type": "SALARY", "value": "Rs. 2,50,000", "start": 178, "end": 190},
+      {"pii_type": "BANK_ACCOUNT", "value": "4829", "start": 213, "end": 217},
+      {"pii_type": "PASSPORT", "value": "XXXX-XXXX-7834", "start": 257, "end": 271},
+      {"pii_type": "PHONE", "value": "+91-98XXX-XX210", "start": 299, "end": 314}
+    ]
+  },
+  {
+    "id": "mobs_03",
+    "document": "Interview debrief: Candidate seemed nervous. She's a single mother \u2014 mentioned it offhand \u2014 two kids, lives in a rented flat near Whitefield. Said she left her previous role at TCS because of 'personal health issues' (didn't elaborate). Her LinkedIn says she went to BITS Pilani. Resume lists her DOB as January nineteen eighty-nine. Current CTC: undisclosed but hinted 'north of 20 lakhs.'",
+    "ground_truth": [
+      {"pii_type": "LOCATION", "value": "Whitefield", "start": 129, "end": 139},
+      {"pii_type": "ORGANIZATION", "value": "TCS", "start": 178, "end": 181},
+      {"pii_type": "MEDICAL_CONDITION", "value": "personal health issues", "start": 195, "end": 217},
+      {"pii_type": "ORGANIZATION", "value": "BITS Pilani", "start": 268, "end": 279},
+      {"pii_type": "DATE_OF_BIRTH", "value": "January nineteen eighty-nine", "start": 308, "end": 336},
+      {"pii_type": "SALARY", "value": "north of 20 lakhs", "start": 370, "end": 388}
+    ]
+  },
+  {
+    "id": "mobs_04",
+    "document": "Overheard in break room (reported to HR): 'Did you know Ankit from accounting has been going to AA meetings? His wife Sneha told Pooja in marketing. Also apparently he owes like 15 lakhs on his credit card. Poor guy, he's only thirty-two and already looks so stressed. He stays in that society near Hebbal flyover.'",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Ankit", "start": 57, "end": 62},
+      {"pii_type": "MEDICAL_CONDITION", "value": "AA meetings", "start": 94, "end": 105},
+      {"pii_type": "NAME", "value": "Sneha", "start": 116, "end": 121},
+      {"pii_type": "NAME", "value": "Pooja", "start": 127, "end": 132},
+      {"pii_type": "SALARY", "value": "15 lakhs", "start": 175, "end": 183},
+      {"pii_type": "AGE", "value": "thirty-two", "start": 233, "end": 243},
+      {"pii_type": "LOCATION", "value": "Hebbal flyover", "start": 297, "end": 311}
+    ]
+  },
+  {
+    "id": "mobs_05",
+    "document": "Data breach notification draft: We regret to inform that a subset of user records was accessed. Affected fields include: first name + last initial (e.g., 'Meghna S.'), partial phone (last 4 digits: 9021), hashed email addresses, and approximate location (pin code 560034). One user, handle @mega_dev on our platform, had their recovery question exposed \u2014 'mother's maiden name.' Total affected: 2,341 accounts across the Bangalore region.",
+    "ground_truth": [
+      {"pii_type": "NAME", "value": "Meghna S.", "start": 152, "end": 161},
+      {"pii_type": "PHONE", "value": "9021", "start": 188, "end": 192},
+      {"pii_type": "LOCATION", "value": "560034", "start": 243, "end": 249},
+      {"pii_type": "USERNAME", "value": "@mega_dev", "start": 263, "end": 272},
+      {"pii_type": "LOCATION", "value": "Bangalore", "start": 416, "end": 425}
+    ]
+  }
+]

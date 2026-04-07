@@ -1,0 +1,19 @@
+name: pii_scanner
+version: "1.0.0"
+description: "A PII (Personally Identifiable Information) Scanner Environment where AI agents detect, classify, and redact sensitive data from documents for privacy compliance."
+author: "Team PII Scanner"
+tags:
+  - privacy
+  - compliance
+  - pii
+  - gdpr
+  - hipaa
+  - dpdp
+  - security
+task_types:
+  - easy
+  - medium_contextual
+  - medium_obfuscated
+  - medium_crossref
+  - hard_audit
+  - hard_adversarial
