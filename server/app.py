@@ -2,6 +2,7 @@
 PII Scanner — FastAPI Application.
 
 Exposes the PII Scanner environment via REST + WebSocket endpoints.
+Also provides a simple /scan endpoint using Presidio + Aho-Corasick.
 Compatible with OpenEnv specification.
 """
 
@@ -12,7 +13,7 @@ import sys
 import time
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,11 +35,12 @@ from models import (
     TaskDifficulty,
 )
 from server.environment import PIIScannerEnvironment
+from server.pii_detector import get_detector
 
 app = FastAPI(
-    title="PII Scanner Environment",
-    description="OpenEnv environment for PII detection, classification, and redaction",
-    version="1.0.0",
+    title="PII-Forge",
+    description="PII detection and redaction powered by Microsoft Presidio + Aho-Corasick",
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -78,7 +80,29 @@ def get_or_create_session(session_id: Optional[str] = None) -> tuple[str, PIISca
     return sid, env
 
 
-# ── REST Endpoints ────────────────────────────────────────────────────────────
+# ── Simple Scan Endpoint (Presidio + Aho-Corasick) ──────────────────────────
+
+class ScanRequest(BaseModel):
+    text: str
+    language: str = "en"
+
+
+class ScanResponse(BaseModel):
+    entities: List[Dict[str, Any]]
+    redacted_text: str
+    entity_count: int
+    type_counts: Dict[str, int]
+
+
+@app.post("/scan", response_model=ScanResponse)
+async def scan_text(request: ScanRequest):
+    """Scan text for PII using Presidio + Aho-Corasick and return detected entities + redacted text."""
+    detector = get_detector()
+    result = detector.detect_and_redact(request.text, request.language)
+    return result
+
+
+# ── REST Endpoints (OpenEnv) ─────────────────────────────────────────────────
 
 class ResetRequest(BaseModel):
     task_type: str = "easy"
@@ -94,7 +118,7 @@ class StepRequest(BaseModel):
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "environment": "pii_scanner", "version": "1.0.0"}
+    return {"status": "healthy", "environment": "pii_scanner", "version": "2.0.0"}
 
 
 @app.post("/reset")
@@ -270,14 +294,14 @@ async def websocket_endpoint(websocket: WebSocket):
         sessions.pop(sid, None)
 
 
-# ── Mount Gradio UI ───────────────────────────────────────────────────────────
+# ── Mount Gradio UI at root ──────────────────────────────────────────────────
 
 try:
     import gradio as gr
     from server.gradio_ui import create_gradio_app
 
     gradio_app = create_gradio_app()
-    app = gr.mount_gradio_app(app, gradio_app, path="/web")
+    app = gr.mount_gradio_app(app, gradio_app, path="/")
 except Exception:
     # Gradio UI is optional; server works without it
     pass
@@ -287,4 +311,4 @@ except Exception:
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=7860)
