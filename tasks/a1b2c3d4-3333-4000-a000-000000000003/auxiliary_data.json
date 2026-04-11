@@ -1,0 +1,64 @@
+{
+  "pii": [
+    {
+      "type": "NAME",
+      "value": "Nisha Verma"
+    },
+    {
+      "type": "EMPLOYEE_ID",
+      "value": "EMP-18823"
+    },
+    {
+      "type": "NAME",
+      "value": "Karthik Menon"
+    },
+    {
+      "type": "EMPLOYEE_ID",
+      "value": "EMP-09412"
+    },
+    {
+      "type": "NAME",
+      "value": "Aditi Shah"
+    },
+    {
+      "type": "NAME",
+      "value": "Rohan Desai"
+    },
+    {
+      "type": "MEDICAL_CONDITION",
+      "value": "PTSD"
+    },
+    {
+      "type": "NAME",
+      "value": "Dr. Lakshmi Iyer"
+    },
+    {
+      "type": "MEDICATION",
+      "value": "Paroxetine 20mg"
+    },
+    {
+      "type": "ADDRESS",
+      "value": "55 Cunningham Road, Bangalore 560052"
+    },
+    {
+      "type": "EMAIL",
+      "value": "k.menon.personal@gmail.com"
+    },
+    {
+      "type": "PHONE",
+      "value": "99800-12345"
+    },
+    {
+      "type": "EMAIL",
+      "value": "nisha.v@company.com"
+    },
+    {
+      "type": "EMAIL",
+      "value": "nisha.verma92@outlook.com"
+    },
+    {
+      "type": "ADDRESS",
+      "value": "Flat 204, Prestige Lakeside, Whitefield, Bangalore 560066"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "pii": [
+    {
+      "type": "NAME",
+      "value": "Kavitha Reddy"
+    },
+    {
+      "type": "AGE",
+      "value": "45"
+    },
+    {
+      "type": "EMPLOYEE_ID",
+      "value": "PAT-772901"
+    },
+    {
+      "type": "MEDICAL_CONDITION",
+      "value": "Type 2 Diabetes Mellitus"
+    },
+    {
+      "type": "MEDICAL_CONDITION",
+      "value": "diabetic retinopathy"
+    },
+    {
+      "type": "MEDICAL_CONDITION",
+      "value": "clinical depression"
+    },
+    {
+      "type": "MEDICATION",
+      "value": "Sertraline 50mg"
+    },
+    {
+      "type": "MEDICATION",
+      "value": "Insulin glargine 20 units"
+    },
+    {
+      "type": "NAME",
+      "value": "Dr. Meena Rao"
+    },
+    {
+      "type": "NAME",
+      "value": "Dr. Suresh"
+    },
+    {
+      "type": "NAME",
+      "value": "Venkat Reddy"
+    },
+    {
+      "type": "PHONE",
+      "value": "080-2555-0834"
+    },
+    {
+      "type": "ADDRESS",
+      "value": "18, 3rd Cross, HSR Layout, Bangalore 560102"
+    },
+    {
+      "type": "NAME",
+      "value": "Dr. Arun Mathew"
+    }
+  ]
+}

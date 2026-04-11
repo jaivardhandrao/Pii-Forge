@@ -1,0 +1,20 @@
+services:
+  pii-forge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pii-forge
+    ports:
+      - "80:7860"
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+      - HOST=0.0.0.0
+      - PORT=7860
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped

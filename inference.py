@@ -194,13 +194,18 @@ Return ONLY valid JSON. No explanation, no markdown.
 
 def call_llm(prompt: str) -> str:
     """Call the LLM and return the response text."""
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.1,
-        max_tokens=4096,
-    )
-    return response.choices[0].message.content.strip()
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+            max_tokens=4096,
+            timeout=90,
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"  [ERROR] LLM call failed: {e}", file=sys.stderr)
+        raise
 
 
 def parse_json_response(text: str) -> any:

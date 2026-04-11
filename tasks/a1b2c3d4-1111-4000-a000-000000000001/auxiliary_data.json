@@ -1,0 +1,40 @@
+{
+  "pii": [
+    {
+      "type": "NAME",
+      "value": "Amit Verma"
+    },
+    {
+      "type": "EMPLOYEE_ID",
+      "value": "EMP-29471"
+    },
+    {
+      "type": "SALARY",
+      "value": "₹18,50,000"
+    },
+    {
+      "type": "NAME",
+      "value": "Rajesh Kumar"
+    },
+    {
+      "type": "NAME",
+      "value": "Sneha Patel"
+    },
+    {
+      "type": "EMAIL",
+      "value": "sneha.patel@company.com"
+    },
+    {
+      "type": "MEDICAL_CONDITION",
+      "value": "asthma"
+    },
+    {
+      "type": "ADDRESS",
+      "value": "42 Brigade Road, Bangalore 560025"
+    },
+    {
+      "type": "PHONE",
+      "value": "080-4555-0192"
+    }
+  ]
+}

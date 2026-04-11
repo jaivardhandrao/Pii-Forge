@@ -1,0 +1,6 @@
+{
+  "task_id": "a1b2c3d4-2222-4000-a000-000000000002",
+  "title": "Patient Discharge Summary",
+  "difficulty": "hard",
+  "document": "PATIENT DISCHARGE SUMMARY\nFortis Hospital, Bangalore\nDate: February 20, 2026\n\nPatient: Kavitha Reddy, Age: 45, Female\nPatient ID: PAT-772901\nAdmission Date: February 14, 2026\n\nDiagnosis: Type 2 Diabetes Mellitus with diabetic retinopathy. The patient also has a history of clinical depression managed with Sertraline 50mg.\n\nTreatment: Insulin glargine 20 units daily, laser photocoagulation for retinopathy performed on Feb 16. Psychiatric consult by Dr. Meena Rao recommended continuing current medication.\n\nFollow-up: Ophthalmology appointment on March 5, 2026 with Dr. Suresh at the Indiranagar clinic. Psychiatry follow-up in 4 weeks.\n\nEmergency Contact: Husband — Venkat Reddy, Phone: 080-2555-0834. Residence: 18, 3rd Cross, HSR Layout, Bangalore 560102.\n\nInsurance: Star Health Policy #SH-4429017, covering self and spouse.\n\nAttending Physician: Dr. Arun Mathew, MD Internal Medicine"
+}

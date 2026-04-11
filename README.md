@@ -1,5 +1,5 @@
 ---
-title: PII Scanner Environment
+title: PII-Forge
 emoji: "🔒"
 colorFrom: red
 colorTo: purple
@@ -9,126 +9,131 @@ pinned: true
 license: mit
 ---
 
-# PII Scanner Environment
+# PII-Forge
 
-An **OpenEnv-compatible** environment where AI agents learn to detect, classify, and redact Personally Identifiable Information (PII) from real-world documents.
+**Detect & Redact Personally Identifiable Information** — powered by **Microsoft Presidio** + **Aho-Corasick** algorithm.
 
-## Overview
+PII-Forge scans documents for sensitive data (names, emails, SSNs, medical records, and more) and produces redacted versions instantly. It combines NLP-based entity recognition with fast multi-pattern keyword matching for comprehensive PII coverage.
 
-Every organization handles sensitive data — employee records, medical files, legal documents, financial reports. This environment challenges AI agents to act as **Data Privacy Officers**, scanning documents for PII and ensuring compliance with regulations like **GDPR**, **HIPAA**, and India's **DPDP Act 2023**.
+## Quick Start
 
-### What Makes This Unique
+### Docker Compose (Recommended)
 
-- **Adversarial & Obfuscated PII**: Documents contain spelled-out phone numbers ("four-zero-eight..."), encoded emails ("name at domain dot com"), partially masked identifiers, and contextual health information — not just simple regex-matchable patterns
-- **Multi-Regulation Compliance Auditing**: Hard mode requires agents to produce compliance reports citing specific sections of DPDP Act, GDPR, HIPAA, POSH Act, and Aadhaar Act
-- **Visual Risk Analysis Dashboard**: Interactive Gradio UI with color-coded PII highlighting, risk heatmaps, side-by-side redaction diffs, and score dashboards
-- **Position-Aware + Fuzzy Grading**: Two-pass grading engine that matches by both value similarity and character-span overlap, handling obfuscated and contextual PII
-- **Multi-Pass LLM Agent**: Baseline inference uses a second-pass detection specifically targeting contextual and obfuscated PII that simple detectors miss
+```bash
+git clone <repo-url>
+cd Pii-Forge
+docker compose up --build
+```
 
-## Task Difficulty Levels
+Open **http://localhost:80** in your browser. That's it.
+
+### Local Development
+
+```bash
+pip install -r server/requirements.txt
+python -m spacy download en_core_web_lg
+uvicorn server.app:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## How It Works
+
+PII-Forge uses two detection engines that run in parallel:
+
+### 1. Microsoft Presidio (NLP/NER)
+
+[Presidio](https://github.com/microsoft/presidio) is Microsoft's open-source SDK for PII detection. It uses spaCy NER models to recognize entities like names, organizations, and locations, plus built-in pattern recognizers for structured data (emails, phone numbers, SSNs, credit cards, etc.).
+
+We extend Presidio with custom recognizers for:
+- Employee IDs (`EMP-XXXX`, `PAT-XXXX`)
+- Indian salary formats (`₹18,50,000`, `45 LPA`)
+- Generic passport numbers
+- Age patterns
+
+### 2. Aho-Corasick Algorithm (Fast Pattern Matching)
+
+The [Aho-Corasick algorithm](https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm) builds a finite-state automaton from keyword dictionaries and scans text in **O(n + m)** time (n = text length, m = matches). This makes it extremely fast for matching against large keyword lists.
+
+We use Aho-Corasick for:
+- **50+ medical conditions** (diabetes, PTSD, depression, cancer, etc.)
+- **50+ medications** (Metformin, Sertraline, Insulin, etc.)
+- Additional regex patterns for Indian phone numbers, addresses, and medication dosages
+
+### Detection Pipeline
+
+```
+Input Text
+    │
+    ├──► Presidio Analyzer (NER + patterns) ──► entities
+    │
+    ├──► Aho-Corasick Automaton (keywords)  ──► entities
+    │
+    └──► Merge + Deduplicate (span overlap) ──► final entities
+                                                    │
+                                                    ▼
+                                              Redacted Text
+                                            (PII → [TYPE] tags)
+```
+
+## Features
+
+- **Paste & Scan**: Simple UI — paste any document, click "Scan & Redact"
+- **20 PII Types**: NAME, EMAIL, PHONE, SSN, CREDIT_CARD, DATE_OF_BIRTH, AGE, ADDRESS, LOCATION, IP_ADDRESS, EMPLOYEE_ID, MEDICAL_CONDITION, MEDICATION, ORGANIZATION, SALARY, BANK_ACCOUNT, PASSPORT, LICENSE_NUMBER, USERNAME, PASSWORD
+- **Color-coded highlighting**: Each PII type has a distinct color in the results
+- **Risk analysis**: Automatic risk level assessment (low/medium/high/critical)
+- **Copy-ready redacted text**: One-click copy of the redacted document
+- **REST API**: Programmatic access via `POST /scan`
+- **OpenEnv compatible**: Full environment API for training AI agents
+
+## API
+
+### POST /scan — Quick PII Detection
+
+```bash
+curl -X POST http://localhost:80/scan \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Contact Sarah Miller at sarah@test.com, SSN: 482-93-1057"}'
+```
+
+Response:
+
+```json
+{
+  "entities": [
+    {"pii_type": "NAME", "value": "Sarah Miller", "start": 8, "end": 20, "score": 0.85, "source": "presidio"},
+    {"pii_type": "EMAIL", "value": "sarah@test.com", "start": 24, "end": 38, "score": 1.0, "source": "presidio"},
+    {"pii_type": "SSN", "value": "482-93-1057", "start": 45, "end": 56, "score": 0.85, "source": "presidio"}
+  ],
+  "redacted_text": "Contact [NAME] at [EMAIL], SSN: [SSN]",
+  "entity_count": 3,
+  "type_counts": {"NAME": 1, "EMAIL": 1, "SSN": 1}
+}
+```
+
+### OpenEnv Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check |
+| `/scan` | POST | Quick PII scan (Presidio + Aho-Corasick) |
+| `/reset` | POST | Start new OpenEnv episode |
+| `/step` | POST | Submit PII detection for grading |
+| `/state/{session_id}` | GET | Get episode progress |
+| `/ws` | WebSocket | Real-time agent connection |
+| `/docs` | GET | Swagger API docs |
+
+## OpenEnv Training Environment
+
+PII-Forge also includes a full **OpenEnv-compatible** training environment for AI agents:
+
+### Task Difficulty Levels
 
 | Level | Tasks | What the Agent Does | Grading |
 |-------|-------|---------------------|---------|
 | **Easy** | 10 | Identify structured PII (emails, phones, SSNs, names) | F1 Score |
-| **Medium** | 15 | Detect PII embedded in natural language — obfuscated numbers, contextual health data, indirect age references, partially masked values | F1 Score |
-| **Hard** | 5 | Full audit: detect PII, generate redacted document, produce compliance report with risk assessment | Weighted: 40% Detection + 30% Redaction + 30% Compliance |
+| **Medium** | 45 | Contextual, obfuscated, and cross-reference PII detection | F1 Score |
+| **Hard** | 10 | Full audit: detect + redact + compliance report | 40% Detection + 30% Redaction + 30% Compliance |
 
-## Environment API
-
-### Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | Health check (returns 200) |
-| `/reset` | POST | Start new episode |
-| `/step` | POST | Submit PII detection |
-| `/state/{session_id}` | GET | Get current progress |
-| `/ws` | WebSocket | Real-time agent connection |
-| `/web` | GET | Interactive Gradio UI |
-| `/docs` | GET | Swagger API docs |
-
-### Action Space
-
-```json
-{
-  "detected_pii": [
-    {
-      "pii_type": "EMAIL",
-      "value": "user@example.com",
-      "start": 15,
-      "end": 31
-    }
-  ],
-  "redacted_text": "Contact [NAME] at [EMAIL]...",
-  "compliance_report": {
-    "findings": [
-      {
-        "value": "user@example.com",
-        "pii_type": "EMAIL",
-        "risk_level": "medium",
-        "regulation": "GDPR Art.6",
-        "recommended_action": "Obtain consent for processing"
-      }
-    ],
-    "summary": "1 PII instance found..."
-  }
-}
-```
-
-### Observation Space
-
-```json
-{
-  "done": false,
-  "reward": 0.85,
-  "document": "The text to scan...",
-  "task_type": "easy",
-  "task_id": "easy_01",
-  "instructions": "Detect all PII...",
-  "feedback": "Detection F1: 85%...",
-  "total_tasks": 10,
-  "current_task_number": 3
-}
-```
-
-### Supported PII Types (20)
-
-`EMAIL`, `PHONE`, `SSN`, `CREDIT_CARD`, `DATE_OF_BIRTH`, `NAME`, `AGE`, `ADDRESS`, `LOCATION`, `IP_ADDRESS`, `EMPLOYEE_ID`, `MEDICAL_CONDITION`, `MEDICATION`, `ORGANIZATION`, `SALARY`, `BANK_ACCOUNT`, `PASSPORT`, `LICENSE_NUMBER`, `USERNAME`, `PASSWORD`
-
-## Reward Function
-
-- **Easy & Medium**: F1 Score (harmonic mean of precision and recall)
-  - `reward = 2 * P * R / (P + R)` where P = precision, R = recall
-  - Range: 0.0 (no correct detections) to 1.0 (perfect detection)
-
-- **Hard**: Weighted composite
-  - `reward = 0.4 * detection_f1 + 0.3 * redaction_score + 0.3 * compliance_score`
-  - Each component ranges 0.0 to 1.0
-
-### Matching Logic
-A detected PII entity matches ground truth when:
-1. **Pass 1**: PII type matches AND value overlaps >= 60% (sequence-based fuzzy matching)
-2. **Pass 2**: PII type matches AND character span overlap >= 50% (catches position-accurate detections)
-
-## Quick Start
-
-### Install Dependencies
-
-```bash
-pip install -r server/requirements.txt
-```
-
-### Run Locally
-
-```bash
-# Start the server
-uvicorn server.app:app --host 0.0.0.0 --port 8000 --reload
-
-# Or run the Gradio UI directly
-python server/gradio_ui.py
-```
-
-### Run Inference
+### Run Inference (LLM-based agent)
 
 ```bash
 export API_BASE_URL="https://api.openai.com/v1"
@@ -138,51 +143,42 @@ export OPENAI_API_KEY="your-key-here"
 python inference.py
 ```
 
-### Docker
+### Reward Function
 
-```bash
-docker build -t pii-scanner-env .
-docker run -p 7860:7860 pii-scanner-env
-```
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `API_BASE_URL` | LLM API endpoint | `https://api.openai.com/v1` |
-| `MODEL_NAME` | Model identifier | `gpt-4o-mini` |
-| `HF_TOKEN` | HuggingFace API token | — |
+- **Easy & Medium**: `F1 = 2 * P * R / (P + R)`
+- **Hard**: `0.4 * detection_f1 + 0.3 * redaction_score + 0.3 * compliance_score`
 
 ## Project Structure
 
 ```
-pii-scanner-env/
-├── inference.py            # Multi-pass LLM baseline agent
-├── models.py               # Pydantic data models
-├── client.py               # WebSocket client
-├── openenv.yaml            # Environment manifest
-├── Dockerfile              # HF Spaces deployment
+Pii-Forge/
+├── docker-compose.yml          # Docker Compose — run with: docker compose up
+├── Dockerfile                  # Container build config
+├── inference.py                # LLM-based baseline agent
+├── models.py                   # Pydantic data models
+├── client.py                   # WebSocket client
+├── openenv.yaml                # Environment manifest
 ├── server/
-│   ├── app.py              # FastAPI server
-│   ├── environment.py      # Core environment logic
-│   ├── grader.py           # Position-aware F1 scoring engine
-│   ├── gradio_ui.py        # Enhanced interactive web UI
-│   ├── tasks/              # Task instructions per difficulty
-│   └── data/               # Synthetic document datasets
+│   ├── app.py                  # FastAPI server (REST + WebSocket + Gradio)
+│   ├── pii_detector.py         # Presidio + Aho-Corasick detection engine
+│   ├── environment.py          # OpenEnv environment logic
+│   ├── grader.py               # F1 scoring engine
+│   ├── gradio_ui.py            # Simplified web UI
+│   ├── tasks/                  # Task instructions per difficulty
+│   └── data/                   # Synthetic document datasets
 └── README.md
 ```
 
-## Dataset
+## Tech Stack
 
-All documents are **synthetic** — no real PII is used. Documents span:
-- Employee records, HR files
-- Medical/clinical notes
-- Legal memos, insurance claims
-- Chat logs, meeting notes, WhatsApp groups
-- School records, support tickets
-- **Adversarial**: Obfuscated emails, spelled-out numbers, partially masked IDs, contextual health references, gossip-style indirect PII
-
-Each document includes pre-annotated ground truth with exact PII positions.
+| Component | Technology |
+|-----------|-----------|
+| PII Detection (NER) | [Microsoft Presidio](https://github.com/microsoft/presidio) + spaCy |
+| PII Detection (Keywords) | [Aho-Corasick](https://pypi.org/project/pyahocorasick/) algorithm |
+| Backend | FastAPI + Uvicorn |
+| Frontend | Gradio |
+| NLP Model | spaCy `en_core_web_lg` |
+| Container | Docker + Docker Compose |
 
 ## Compliance Frameworks Covered
 
@@ -191,16 +187,11 @@ Each document includes pre-annotated ground truth with exact PII positions.
 - **HIPAA** (US) — Health Insurance Portability and Accountability Act
 - **POSH Act 2013** (India) — Prevention of Sexual Harassment
 - **Aadhaar Act** (India) — Biometric ID regulations
-- **IRDAI / Insurance Act 1938** (India) — Insurance data regulations
-- **POCSO Act** (India) — Protection of Children from Sexual Offences
 
-## Technical Constraints
+## Dataset
 
-- Inference runtime: < 20 minutes
-- Infrastructure: 2 vCPU, 8GB RAM
-- All LLM calls via OpenAI-compatible client
+All documents are **synthetic** — no real PII is used. Documents span employee records, medical notes, legal memos, insurance claims, chat logs, and adversarial examples with obfuscated PII.
 
 ## License
 
 MIT
-# Pii-Forge
