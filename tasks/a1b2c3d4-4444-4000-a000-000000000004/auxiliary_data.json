@@ -1,0 +1,60 @@
+{
+  "pii": [
+    {
+      "type": "NAME",
+      "value": "Deepak Nair"
+    },
+    {
+      "type": "DATE_OF_BIRTH",
+      "value": "08/12/1978"
+    },
+    {
+      "type": "SSN",
+      "value": "412-68-9073"
+    },
+    {
+      "type": "MEDICAL_CONDITION",
+      "value": "pancreatitis"
+    },
+    {
+      "type": "MEDICATION",
+      "value": "Tramadol 50mg"
+    },
+    {
+      "type": "NAME",
+      "value": "Dr. Priya Menon"
+    },
+    {
+      "type": "MEDICAL_CONDITION",
+      "value": "hypertension"
+    },
+    {
+      "type": "MEDICATION",
+      "value": "Amlodipine 5mg"
+    },
+    {
+      "type": "SALARY",
+      "value": "₹4,75,000"
+    },
+    {
+      "type": "BANK_ACCOUNT",
+      "value": "0012-3398-7654"
+    },
+    {
+      "type": "EMAIL",
+      "value": "deepak.nair@email.com"
+    },
+    {
+      "type": "PHONE",
+      "value": "+91-98410-55678"
+    },
+    {
+      "type": "ADDRESS",
+      "value": "12, Thiruvalluvar Street, T. Nagar, Chennai 600017"
+    },
+    {
+      "type": "NAME",
+      "value": "Sunita Rao"
+    }
+  ]
+}

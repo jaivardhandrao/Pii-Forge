@@ -1,0 +1,56 @@
+{
+  "pii": [
+    {
+      "type": "NAME",
+      "value": "Anjali Kapoor"
+    },
+    {
+      "type": "NAME",
+      "value": "Arjun Mehta"
+    },
+    {
+      "type": "AGE",
+      "value": "13"
+    },
+    {
+      "type": "EMPLOYEE_ID",
+      "value": "STU-20260034"
+    },
+    {
+      "type": "NAME",
+      "value": "Vikram Mehta"
+    },
+    {
+      "type": "EMAIL",
+      "value": "vikram.mehta@gmail.com"
+    },
+    {
+      "type": "PHONE",
+      "value": "011-2614-5589"
+    },
+    {
+      "type": "NAME",
+      "value": "Rekha Sharma"
+    },
+    {
+      "type": "MEDICATION",
+      "value": "Penicillin"
+    },
+    {
+      "type": "NAME",
+      "value": "Dr. Sunil Verma"
+    },
+    {
+      "type": "MEDICATION",
+      "value": "Ibuprofen 200mg"
+    },
+    {
+      "type": "SSN",
+      "value": "4832-9917-6254"
+    },
+    {
+      "type": "ADDRESS",
+      "value": "B-204, Vasant Enclave, New Delhi 110057"
+    }
+  ]
+}

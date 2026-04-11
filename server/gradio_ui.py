@@ -221,7 +221,6 @@ VP Human Resources
 
 def _build_curl_command(redacted_text: str) -> str:
     """Build a ready-to-paste curl command with properly escaped JSON."""
-    # Escape for JSON string: newlines → \\n, quotes → \\"
     escaped = redacted_text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
     return (
         f'curl -X POST http://localhost:80/api/grade \\\n'
@@ -243,9 +242,9 @@ def scan_document(text: str) -> Tuple[str, str, str, str, str]:
     redacted = result["redacted_text"]
 
     highlighted_html = highlight_pii(text, entities)
+    curl_cmd = _build_curl_command(redacted)
     stats_html = build_stats_html(entities)
     entities_table = format_entities_table(entities)
-    curl_cmd = _build_curl_command(redacted)
 
     return highlighted_html, redacted, curl_cmd, stats_html, entities_table
 
@@ -385,18 +384,18 @@ Powered by **Microsoft Presidio** (NER-based detection) + **Aho-Corasick** algor
                                     value="<p style='color:#6c7086;text-align:center;padding:24px;'>Results will appear here.</p>",
                                     label="Detected PII",
                                 )
-                            with gr.TabItem("Redacted — Copy"):
-                                redacted_output = gr.Textbox(
-                                    label="Redacted text (Ctrl+A, Ctrl+C to copy)",
-                                    lines=10,
-                                    max_lines=20,
+                            with gr.TabItem("Copy Text"):
+                                redacted_output = gr.Code(
+                                    label="Redacted text",
+                                    language=None,
+                                    lines=12,
                                     interactive=False,
                                 )
-                            with gr.TabItem("Redacted — Curl"):
-                                curl_output = gr.Textbox(
-                                    label="Curl command (Ctrl+A, Ctrl+C — paste directly in terminal)",
-                                    lines=10,
-                                    max_lines=20,
+                            with gr.TabItem("Copy as Curl"):
+                                curl_output = gr.Code(
+                                    label="Curl command — paste in terminal",
+                                    language="shell",
+                                    lines=12,
                                     interactive=False,
                                 )
 
@@ -461,8 +460,8 @@ LICENSE_NUMBER, USERNAME, PASSWORD
             fn=lambda: (
                 "",
                 "<p style='color:#6c7086;text-align:center;padding:24px;'>Results will appear here.</p>",
-                "",
-                "",
+                None,
+                None,
                 "<p style='color:#6c7086;text-align:center;padding:24px;'>Scan a document to see risk analysis.</p>",
                 "No PII detected yet.",
             ),
