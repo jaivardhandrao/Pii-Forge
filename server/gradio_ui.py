@@ -219,11 +219,22 @@ VP Human Resources
 """
 
 
-def scan_document(text: str) -> Tuple[str, str, str, str]:
+def _build_curl_command(redacted_text: str) -> str:
+    """Build a ready-to-paste curl command with properly escaped JSON."""
+    # Escape for JSON string: newlines → \\n, quotes → \\"
+    escaped = redacted_text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    return (
+        f'curl -X POST http://localhost:80/api/grade \\\n'
+        f'  -H "Content-Type: application/json" \\\n'
+        f'  -d \'{{"task_id": "REPLACE_WITH_TASK_ID", "result": "{escaped}"}}\''
+    )
+
+
+def scan_document(text: str) -> Tuple[str, str, str, str, str]:
     """Run PII detection and return all UI outputs."""
     if not text or not text.strip():
         empty = "<p style='color:#6c7086;text-align:center;padding:24px;'>Paste a document above and click Scan.</p>"
-        return empty, "", empty, "No PII detected."
+        return empty, "", "", empty, "No PII detected."
 
     detector = get_detector()
     result = detector.detect_and_redact(text)
@@ -234,8 +245,9 @@ def scan_document(text: str) -> Tuple[str, str, str, str]:
     highlighted_html = highlight_pii(text, entities)
     stats_html = build_stats_html(entities)
     entities_table = format_entities_table(entities)
+    curl_cmd = _build_curl_command(redacted)
 
-    return highlighted_html, redacted, stats_html, entities_table
+    return highlighted_html, redacted, curl_cmd, stats_html, entities_table
 
 
 # ── Tasks HTML builder ───────────────────────────────────────────────────────
@@ -373,11 +385,18 @@ Powered by **Microsoft Presidio** (NER-based detection) + **Aho-Corasick** algor
                                     value="<p style='color:#6c7086;text-align:center;padding:24px;'>Results will appear here.</p>",
                                     label="Detected PII",
                                 )
-                            with gr.TabItem("Redacted"):
+                            with gr.TabItem("Redacted — Copy"):
                                 redacted_output = gr.Textbox(
-                                    label="Redacted Document (select all + copy)",
-                                    lines=14,
-                                    max_lines=30,
+                                    label="Redacted text (Ctrl+A, Ctrl+C to copy)",
+                                    lines=10,
+                                    max_lines=20,
+                                    interactive=False,
+                                )
+                            with gr.TabItem("Redacted — Curl"):
+                                curl_output = gr.Textbox(
+                                    label="Curl command (Ctrl+A, Ctrl+C — paste directly in terminal)",
+                                    lines=10,
+                                    max_lines=20,
                                     interactive=False,
                                 )
 
@@ -429,7 +448,7 @@ LICENSE_NUMBER, USERNAME, PASSWORD
         scan_btn.click(
             fn=scan_document,
             inputs=[input_text],
-            outputs=[highlighted_output, redacted_output, stats_output, entities_output],
+            outputs=[highlighted_output, redacted_output, curl_output, stats_output, entities_output],
         )
 
         sample_btn.click(
@@ -439,9 +458,16 @@ LICENSE_NUMBER, USERNAME, PASSWORD
         )
 
         clear_btn.click(
-            fn=lambda: ("", "<p style='color:#6c7086;text-align:center;padding:24px;'>Results will appear here.</p>", "", "<p style='color:#6c7086;text-align:center;padding:24px;'>Scan a document to see risk analysis.</p>", "No PII detected yet."),
+            fn=lambda: (
+                "",
+                "<p style='color:#6c7086;text-align:center;padding:24px;'>Results will appear here.</p>",
+                "",
+                "",
+                "<p style='color:#6c7086;text-align:center;padding:24px;'>Scan a document to see risk analysis.</p>",
+                "No PII detected yet.",
+            ),
             inputs=[],
-            outputs=[input_text, highlighted_output, redacted_output, stats_output, entities_output],
+            outputs=[input_text, highlighted_output, redacted_output, curl_output, stats_output, entities_output],
         )
 
     return demo
