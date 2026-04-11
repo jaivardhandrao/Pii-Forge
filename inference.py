@@ -253,7 +253,7 @@ def detect_pii(document: str, task_type: str = "easy") -> list[PIIEntity]:
     entities = _parse_entities(first_pass_data)
 
     # Second pass for non-easy tasks
-    if task_type != "easy" and entities:
+    if task_type != "easy":
         first_pass_summary = json.dumps(
             [{"pii_type": e.pii_type.value, "value": e.value} for e in entities],
             indent=2,
@@ -327,7 +327,7 @@ def run_episode(env: PIIScannerEnvironment, task_type: str) -> float:
     Run a single episode for the given task type.
     Emits [START], [STEP]*, [END] to stdout in the required format.
     """
-    is_hard = task_type in ("hard", "hard_audit", "hard_adversarial")
+    is_hard = task_type in ("hard_audit", "hard_adversarial")
 
     obs = env.reset(task_type=task_type)
     state = env.state
@@ -428,15 +428,18 @@ def main():
         "hard_adversarial",
     ]
 
-    for task_type in task_types:
-        print(f"\n--- Running {task_type.upper()} tasks ---", file=sys.stderr)
-        start_time = time.time()
+    try:
+        for task_type in task_types:
+            print(f"\n--- Running {task_type.upper()} tasks ---", file=sys.stderr)
+            start_time = time.time()
 
-        score = run_episode(env, task_type)
-        elapsed = time.time() - start_time
+            score = run_episode(env, task_type)
+            elapsed = time.time() - start_time
 
-        results[task_type] = score
-        print(f"  Score: {score:.2%} ({elapsed:.1f}s)", file=sys.stderr)
+            results[task_type] = score
+            print(f"  Score: {score:.2%} ({elapsed:.1f}s)", file=sys.stderr)
+    finally:
+        env.close()
 
     # Final summary to stderr (not stdout — stdout is reserved for [START]/[STEP]/[END])
     avg_score = sum(results.values()) / len(results)
@@ -446,8 +449,6 @@ def main():
         print(f"  {task_type:25s}: {score:.2%}", file=sys.stderr)
     print(f"  {'AVERAGE':25s}: {avg_score:.2%}", file=sys.stderr)
     print(f"{'=' * 60}", file=sys.stderr)
-
-    env.close()
 
 
 if __name__ == "__main__":
