@@ -123,7 +123,9 @@ async def health():
 
 
 @app.post("/reset")
-async def reset(request: ResetRequest):
+async def reset(request: Optional[ResetRequest] = None):
+    if request is None:
+        request = ResetRequest()
     sid, env = get_or_create_session(request.session_id)
     obs = env.reset(task_type=request.task_type)
     return {
