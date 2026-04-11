@@ -36,6 +36,7 @@ from models import (
 )
 from server.environment import PIIScannerEnvironment
 from server.pii_detector import get_detector
+from server.tasks_graded import TASKS, TASKS_BY_ID, grade_result
 
 app = FastAPI(
     title="PII-Forge",
@@ -202,6 +203,65 @@ async def get_state(session_id: str):
 @app.get("/state")
 async def get_state_default():
     return {"error": "Provide session_id: GET /state/{session_id}"}
+
+
+# ── Graded Tasks API ─────────────────────────────────────────────────────────
+
+class GradeRequest(BaseModel):
+    task_id: str
+    result: Optional[str] = None
+
+
+@app.get("/api/tasks")
+async def list_tasks():
+    """List all available graded tasks (documents with PII to redact)."""
+    return [
+        {
+            "task_id": t["task_id"],
+            "title": t["title"],
+            "difficulty": t["difficulty"],
+            "pii_count": len(t["pii"]),
+            "document": t["document"],
+        }
+        for t in TASKS
+    ]
+
+
+@app.get("/api/tasks/{task_id}")
+async def get_task(task_id: str):
+    """Get a single task by ID — returns the document to redact."""
+    task = TASKS_BY_ID.get(task_id)
+    if not task:
+        return JSONResponse(status_code=404, content={"error": f"Task '{task_id}' not found."})
+    return {
+        "task_id": task["task_id"],
+        "title": task["title"],
+        "difficulty": task["difficulty"],
+        "pii_count": len(task["pii"]),
+        "document": task["document"],
+    }
+
+
+@app.post("/api/grade")
+async def grade_task(request: GradeRequest):
+    """
+    Grade a redacted paragraph against ground truth PII.
+
+    Body: {"task_id": "uuid", "result": "redacted paragraph text"}
+
+    If "result" is missing or empty, returns the original document with score 0.0.
+
+    Scoring:
+      - pii_removal_score: fraction of PII values removed (0.0 – 1.0)
+      - content_preservation: fraction of non-PII words preserved (0.0 – 1.0)
+      - final score = pii_removal_score * content_preservation
+
+    This prevents gaming by submitting empty/blank text.
+    """
+    result = grade_result(request.task_id, request.result)
+    if "error" in result:
+        return JSONResponse(status_code=404, content=result)
+    return result
 
 
 # ── WebSocket Endpoint ────────────────────────────────────────────────────────

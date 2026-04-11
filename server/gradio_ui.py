@@ -19,6 +19,7 @@ import gradio as gr
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from server.pii_detector import get_detector
+from server.tasks_graded import TASKS
 
 # ── PII type color map ──────────────────────────────────────────────────────
 
@@ -196,24 +197,25 @@ def format_entities_table(entities: List[Dict[str, Any]]) -> str:
 
 # ── Core scan function ───────────────────────────────────────────────────────
 
-SAMPLE_TEXT = """CONFIDENTIAL - EMPLOYEE RECORD
+SAMPLE_TEXT = """CONFIDENTIAL — TERMINATION NOTICE
 
-Name: Sarah Miller
-Email: sarah.miller@techcorp.com
-Phone: 408-555-0147
-SSN: 482-93-1057
-Date of Birth: 03/15/1990
-Employee ID: EMP-4821
+To: Amit Verma
+Employee ID: EMP-29471
+Department: Engineering
+Date: March 15, 2026
 
-Address: 1425 Oak Street, San Jose, CA 95112
-Salary: $125,000 per year
-Bank Account: 4521-0098-7612
+Dear Amit,
 
-Medical Notes: Patient has Type 2 Diabetes managed with Metformin 500mg.
-History of clinical depression; currently on Sertraline 50mg.
+This letter confirms the termination of your employment effective March 31, 2026. Your final salary of ₹18,50,000 will be credited to your HDFC Bank account ending in 4829. Your performance review scores of 2.1/5 for the last two quarters were below the minimum threshold.
 
-Emergency Contact: Lisa Chen, 415-555-0987
-Passport: J8274651
+Your manager, Rajesh Kumar, and HR representative Sneha Patel (sneha.patel@company.com) have documented the performance improvement plan discussions. Please return your laptop and ID badge to the Whitefield office, Bangalore.
+
+Your health insurance (Policy #MED-88421) covering your pre-existing asthma condition will remain active until April 30, 2026. Continuation details will be sent to your registered address at 42 Brigade Road, Bangalore 560025.
+
+For questions, contact Sneha directly at 080-4555-0192.
+
+Sincerely,
+VP Human Resources
 """
 
 
@@ -236,6 +238,95 @@ def scan_document(text: str) -> Tuple[str, str, str, str]:
     return highlighted_html, redacted, stats_html, entities_table
 
 
+# ── Tasks HTML builder ───────────────────────────────────────────────────────
+
+DIFFICULTY_COLORS = {"easy": "#27AE60", "medium": "#F39C12", "hard": "#E74C3C"}
+
+
+def _build_tasks_html() -> str:
+    """Build HTML cards for each graded task with curl copy buttons."""
+    cards = ""
+    for i, task in enumerate(TASKS, 1):
+        color = DIFFICULTY_COLORS.get(task["difficulty"], "#888")
+        tid = task["task_id"]
+        # Escape document for HTML display
+        doc_preview = html_lib.escape(task["document"][:300])
+        if len(task["document"]) > 300:
+            doc_preview += "..."
+
+        curl_cmd = (
+            f'curl -X POST http://localhost:80/api/grade '
+            f'-H "Content-Type: application/json" '
+            f"""-d '{{"task_id": "{tid}", "result": "YOUR_REDACTED_TEXT_HERE"}}'"""
+        )
+        curl_escaped = html_lib.escape(curl_cmd)
+
+        # JS to copy the curl command; uses a unique ID per task
+        copy_id = f"curl-{i}"
+
+        cards += f"""
+        <div style="background:#1e1e2e;border:1px solid #313244;border-radius:10px;padding:16px;margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <div>
+                    <span style="font-size:18px;font-weight:700;color:#cdd6f4;">Task {i}: {html_lib.escape(task["title"])}</span>
+                    <span style="background:{color}30;border:1px solid {color};color:{color};font-size:11px;
+                                font-weight:600;padding:2px 8px;border-radius:4px;margin-left:8px;
+                                text-transform:uppercase;">{task["difficulty"]}</span>
+                </div>
+                <span style="font-size:12px;color:#6c7086;">{len(task["pii"])} PII items</span>
+            </div>
+
+            <div style="font-size:11px;color:#6c7086;margin-bottom:6px;font-family:monospace;">
+                Task ID: <code style="color:#89b4fa;background:#313244;padding:1px 6px;border-radius:3px;user-select:all;">{tid}</code>
+            </div>
+
+            <details style="margin-top:8px;">
+                <summary style="cursor:pointer;color:#89b4fa;font-size:13px;font-weight:600;">
+                    Show Document
+                </summary>
+                <pre style="background:#11111b;color:#cdd6f4;padding:12px;border-radius:6px;margin-top:6px;
+                            font-size:12px;white-space:pre-wrap;max-height:250px;overflow-y:auto;
+                            border:1px solid #313244;">{html_lib.escape(task["document"])}</pre>
+            </details>
+
+            <details style="margin-top:6px;">
+                <summary style="cursor:pointer;color:#89b4fa;font-size:13px;font-weight:600;">
+                    Show curl command
+                </summary>
+                <div style="position:relative;margin-top:6px;">
+                    <pre id="{copy_id}" style="background:#11111b;color:#a6e3a1;padding:12px;border-radius:6px;
+                                font-size:11px;white-space:pre-wrap;word-break:break-all;
+                                border:1px solid #313244;user-select:all;">{curl_escaped}</pre>
+                </div>
+            </details>
+
+            <div style="margin-top:8px;">
+                <span style="font-size:11px;color:#6c7086;">PII to redact: </span>
+                {"".join(
+                    f'<span style="display:inline-block;margin:2px;padding:1px 6px;background:{PII_COLORS.get(p["type"], "#888")}25;'
+                    f'border:1px solid {PII_COLORS.get(p["type"], "#888")};border-radius:3px;font-size:10px;'
+                    f'color:{PII_COLORS.get(p["type"], "#888")};font-weight:600;">{p["type"]}</span>'
+                    for p in task["pii"]
+                )}
+            </div>
+        </div>
+        """
+
+    return f"""
+    <div style="max-width:900px;">
+        {cards}
+        <div style="background:#1e1e2e;border:1px solid #313244;border-radius:10px;padding:14px;margin-top:10px;">
+            <div style="font-size:13px;font-weight:600;color:#cdd6f4;margin-bottom:6px;">Quick API Reference</div>
+            <div style="font-size:12px;color:#6c7086;font-family:monospace;line-height:1.8;">
+                <code style="color:#89b4fa;">GET /api/tasks</code> — List all tasks<br>
+                <code style="color:#89b4fa;">GET /api/tasks/{{task_id}}</code> — Get a specific task<br>
+                <code style="color:#89b4fa;">POST /api/grade</code> — Grade your submission<br>
+            </div>
+        </div>
+    </div>
+    """
+
+
 # ── Gradio App ───────────────────────────────────────────────────────────────
 
 CUSTOM_CSS = """
@@ -255,50 +346,74 @@ def create_gradio_app() -> gr.Blocks:
 **Detect & Redact Personally Identifiable Information**
 
 Powered by **Microsoft Presidio** (NER-based detection) + **Aho-Corasick** algorithm (fast keyword matching).
-Paste any document below and click **Scan** to find and redact PII instantly.
         """)
 
-        with gr.Row():
-            # Left: Input
-            with gr.Column(scale=1):
-                input_text = gr.Textbox(
-                    label="Paste your document",
-                    placeholder="Paste any text containing PII here...",
-                    lines=14,
-                    max_lines=30,
-                )
-                with gr.Row():
-                    scan_btn = gr.Button("Scan & Redact", variant="primary", size="lg")
-                    sample_btn = gr.Button("Load Sample", variant="secondary", size="lg")
-                    clear_btn = gr.Button("Clear", size="lg")
+        with gr.Tabs():
+            # ── Tab 1: Scanner ──────────────────────────────────────────
+            with gr.TabItem("Scanner"):
+                gr.Markdown("Paste any document below and click **Scan** to find and redact PII instantly.")
 
-            # Right: Results
-            with gr.Column(scale=1):
-                with gr.Tabs():
-                    with gr.TabItem("Highlighted"):
-                        highlighted_output = gr.HTML(
-                            value="<p style='color:#6c7086;text-align:center;padding:24px;'>Results will appear here.</p>",
-                            label="Detected PII",
-                        )
-                    with gr.TabItem("Redacted"):
-                        redacted_output = gr.Textbox(
-                            label="Redacted Document (select all + copy)",
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        input_text = gr.Textbox(
+                            label="Paste your document",
+                            placeholder="Paste any text containing PII here...",
                             lines=14,
                             max_lines=30,
-                            interactive=False,
                         )
+                        with gr.Row():
+                            scan_btn = gr.Button("Scan & Redact", variant="primary", size="lg")
+                            sample_btn = gr.Button("Load Sample", variant="secondary", size="lg")
+                            clear_btn = gr.Button("Clear", size="lg")
 
-        gr.Markdown("---")
+                    with gr.Column(scale=1):
+                        with gr.Tabs():
+                            with gr.TabItem("Highlighted"):
+                                highlighted_output = gr.HTML(
+                                    value="<p style='color:#6c7086;text-align:center;padding:24px;'>Results will appear here.</p>",
+                                    label="Detected PII",
+                                )
+                            with gr.TabItem("Redacted"):
+                                redacted_output = gr.Textbox(
+                                    label="Redacted Document (select all + copy)",
+                                    lines=14,
+                                    max_lines=30,
+                                    interactive=False,
+                                )
 
-        with gr.Row():
-            with gr.Column(scale=1):
-                gr.Markdown("### Risk Analysis")
-                stats_output = gr.HTML(
-                    value="<p style='color:#6c7086;text-align:center;padding:24px;'>Scan a document to see risk analysis.</p>"
-                )
-            with gr.Column(scale=1):
-                gr.Markdown("### Detected Entities")
-                entities_output = gr.Markdown("No PII detected yet.")
+                gr.Markdown("---")
+
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        gr.Markdown("### Risk Analysis")
+                        stats_output = gr.HTML(
+                            value="<p style='color:#6c7086;text-align:center;padding:24px;'>Scan a document to see risk analysis.</p>"
+                        )
+                    with gr.Column(scale=1):
+                        gr.Markdown("### Detected Entities")
+                        entities_output = gr.Markdown("No PII detected yet.")
+
+            # ── Tab 2: Graded Tasks ─────────────────────────────────────
+            with gr.TabItem("Graded Tasks"):
+                gr.Markdown("""
+### Graded PII Redaction Tasks
+
+Each task contains a document with known PII. Your job: **remove all PII** from the document
+and submit the redacted version via the API. The grader checks each PII value and scores you
+out of **1.0**.
+
+**Anti-gaming**: You must preserve the non-PII content. Submitting blank text or gibberish
+scores **0.0** because `final_score = pii_removal × content_preservation`.
+
+**How to use**:
+1. Pick a task below
+2. Copy the `curl` command
+3. Replace `YOUR_REDACTED_TEXT_HERE` with your redacted version
+4. The API returns your score with per-PII breakdown
+                """)
+
+                tasks_html = _build_tasks_html()
+                gr.HTML(value=tasks_html)
 
         # Footer
         gr.Markdown("""
