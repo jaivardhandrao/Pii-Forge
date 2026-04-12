@@ -34,6 +34,7 @@ import json
 import os
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import List, Optional
 
@@ -61,11 +62,14 @@ MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
 HF_TOKEN = os.getenv("HF_TOKEN", "")
 BENCHMARK = "pii_scanner"
 SUCCESS_THRESHOLD = 0.1  # normalized score in [0, 1]
+LLM_TIMEOUT = 30  # seconds per LLM call
 
 client = OpenAI(
     base_url=API_BASE_URL,
     api_key=HF_TOKEN or os.getenv("OPENAI_API_KEY", ""),
 )
+
+executor = ThreadPoolExecutor(max_workers=3)
 
 # ── Structured Logging (MANDATORY FORMAT) ─────────────────────────────────────
 
@@ -192,15 +196,15 @@ Return ONLY valid JSON. No explanation, no markdown.
 
 # ── LLM Helper ────────────────────────────────────────────────────────────────
 
-def call_llm(prompt: str) -> str:
+def call_llm(prompt: str, max_tokens: int = 2048) -> str:
     """Call the LLM and return the response text."""
     try:
         response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
-            max_tokens=4096,
-            timeout=90,
+            max_tokens=max_tokens,
+            timeout=LLM_TIMEOUT,
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
@@ -330,13 +334,13 @@ def run_episode(env: PIIScannerEnvironment, task_type: str) -> float:
     is_hard = task_type in ("hard_audit", "hard_adversarial")
 
     obs = env.reset(task_type=task_type)
-    state = env.state
 
     log_start(task=task_type, env=BENCHMARK, model=MODEL_NAME)
 
     step_num = 0
     rewards: List[float] = []
     success = False
+    score = 0.0
 
     try:
         while not obs.done:
@@ -348,14 +352,25 @@ def run_episode(env: PIIScannerEnvironment, task_type: str) -> float:
                 # Step 1: Detect PII (multi-pass for non-easy)
                 entities = detect_pii(document, task_type)
 
-                # Step 2: For hard tasks, generate redaction and compliance report
+                # Step 2: For hard tasks, run redaction + compliance IN PARALLEL
                 redacted_text = None
                 compliance_report = None
                 if is_hard:
-                    redacted_text = generate_redaction(document, entities)
-                    compliance_report = generate_compliance_report(
-                        document, entities, "DPDP Act 2023 (India), GDPR, HIPAA"
+                    redact_future = executor.submit(
+                        generate_redaction, document, entities
                     )
+                    comply_future = executor.submit(
+                        generate_compliance_report,
+                        document, entities, "DPDP Act 2023 (India), GDPR, HIPAA",
+                    )
+                    try:
+                        redacted_text = redact_future.result(timeout=LLM_TIMEOUT + 5)
+                    except Exception as exc:
+                        print(f"  [WARN] Redaction failed: {exc}", file=sys.stderr)
+                    try:
+                        compliance_report = comply_future.result(timeout=LLM_TIMEOUT + 5)
+                    except Exception as exc:
+                        print(f"  [WARN] Compliance failed: {exc}", file=sys.stderr)
 
                 # Build action
                 action = PIIAction(
@@ -442,7 +457,7 @@ def main():
         env.close()
 
     # Final summary to stderr (not stdout — stdout is reserved for [START]/[STEP]/[END])
-    avg_score = sum(results.values()) / len(results)
+    avg_score = sum(results.values()) / len(results) if results else 0.0
     print(f"\n{'=' * 60}", file=sys.stderr)
     print("FINAL RESULTS:", file=sys.stderr)
     for task_type, score in results.items():
