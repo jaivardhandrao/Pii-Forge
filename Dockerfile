@@ -26,12 +26,13 @@ ENV PYTHONUNBUFFERED=1
 ENV HOST=0.0.0.0
 ENV PORT=7860
 
-# Expose port
+# Expose ports (7860 for HF Spaces, 8000 for OpenEnv SDK evaluator)
 EXPOSE 7860
+EXPOSE 8000
 
-# Health check
+# Health check uses PORT env var
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD curl -f http://localhost:7860/health || exit 1
+    CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Run FastAPI + Gradio server
-CMD ["python", "-m", "uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]
+# Run server on PORT (default 7860 for HF, overridden to 8000 by evaluator via env_vars)
+CMD ["sh", "-c", "python -m uvicorn server.app:app --host 0.0.0.0 --port ${PORT}"]
