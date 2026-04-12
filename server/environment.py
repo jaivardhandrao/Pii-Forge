@@ -13,6 +13,8 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from openenv.core.env_server.interfaces import Environment
+
 from models import (
     ComplianceReport,
     PIIAction,
@@ -94,7 +96,7 @@ def _get_instructions(difficulty: TaskDifficulty) -> str:
     return _TASK_CONFIG[difficulty]["instructions"]
 
 
-class PIIScannerEnvironment:
+class PIIScannerEnvironment(Environment[PIIAction, PIIObservation, PIIState]):
     """
     PII Scanner Environment following the OpenEnv pattern.
 
@@ -105,6 +107,7 @@ class PIIScannerEnvironment:
     SUPPORTS_CONCURRENT_SESSIONS = True
 
     def __init__(self):
+        super().__init__()
         self._state = PIIState()
         self._documents: List[Dict[str, Any]] = []
         self._current_doc: Optional[Dict[str, Any]] = None
@@ -250,5 +253,4 @@ class PIIScannerEnvironment:
                 "hard_audit",
                 "hard_adversarial",
             ],
-            "pii_types": [t.value for t in PIIEntity.__annotations__],
         }

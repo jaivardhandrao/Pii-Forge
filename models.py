@@ -12,6 +12,8 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
+from openenv.core.env_server.types import Action, Observation, State
+
 
 # ── PII Entity Types ──────────────────────────────────────────────────────────
 
@@ -86,7 +88,7 @@ class ComplianceReport(BaseModel):
 
 # ── OpenEnv Action ────────────────────────────────────────────────────────────
 
-class PIIAction(BaseModel):
+class PIIAction(Action):
     """Action submitted by the agent: detected PII entities + optional redaction."""
     detected_pii: List[PIIEntity] = Field(
         default_factory=list,
@@ -100,15 +102,12 @@ class PIIAction(BaseModel):
         default=None,
         description="Compliance report (required for hard tasks)"
     )
-    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 # ── OpenEnv Observation ───────────────────────────────────────────────────────
 
-class PIIObservation(BaseModel):
+class PIIObservation(Observation):
     """Observation returned by the environment after each step."""
-    done: bool = Field(default=False, description="Whether the episode is complete")
-    reward: Optional[float] = Field(default=None, description="Reward for this step (0.0-1.0)")
     document: str = Field(default="", description="The document text to scan for PII")
     task_type: TaskDifficulty = Field(default=TaskDifficulty.EASY, description="Current task difficulty")
     task_id: str = Field(default="", description="Unique task identifier")
@@ -116,15 +115,12 @@ class PIIObservation(BaseModel):
     feedback: Optional[str] = Field(default=None, description="Grading feedback after action")
     total_tasks: int = Field(default=0, description="Total tasks in this episode")
     current_task_number: int = Field(default=0, description="Current task number (1-indexed)")
-    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 # ── OpenEnv State ─────────────────────────────────────────────────────────────
 
-class PIIState(BaseModel):
+class PIIState(State):
     """Internal environment state for the episode."""
-    episode_id: Optional[str] = Field(default=None)
-    step_count: int = Field(default=0)
     current_task_index: int = Field(default=0)
     total_tasks: int = Field(default=0)
     task_type: TaskDifficulty = Field(default=TaskDifficulty.EASY)

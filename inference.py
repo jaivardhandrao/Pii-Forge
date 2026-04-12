@@ -6,6 +6,7 @@ MANDATORY
     API_BASE_URL   The API endpoint for the LLM.
     MODEL_NAME     The model identifier to use for inference.
     HF_TOKEN       Your Hugging Face / API key.
+    IMAGE_NAME     The name of the local Docker image for the environment.
 
 - The inference script must be named `inference.py` and placed in the root directory of the project
 - Participants must use OpenAI Client for all LLM calls using above variables
@@ -30,19 +31,16 @@ STDOUT FORMAT
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import sys
-import time
 from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
 from typing import List, Optional
 
 from openai import OpenAI
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
-
+from client import PIIScannerEnv
 from models import (
     ComplianceFinding,
     ComplianceReport,
@@ -51,27 +49,33 @@ from models import (
     PIIObservation,
     PIIType,
     RiskLevel,
-    TaskDifficulty,
 )
-from server.environment import PIIScannerEnvironment
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
+IMAGE_NAME = os.getenv("IMAGE_NAME")
+API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY") or os.getenv("OPENAI_API_KEY", "")
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
-HF_TOKEN = os.getenv("HF_TOKEN", "")
+
 BENCHMARK = "pii_scanner"
-SUCCESS_THRESHOLD = 0.1  # normalized score in [0, 1]
-LLM_TIMEOUT = 30  # seconds per LLM call
+SUCCESS_THRESHOLD = 0.1
+LLM_TIMEOUT = 30
 
-client = OpenAI(
-    base_url=API_BASE_URL,
-    api_key=HF_TOKEN or os.getenv("OPENAI_API_KEY", ""),
-)
+TASK_TYPES = [
+    "easy",
+    "medium_contextual",
+    "medium_obfuscated",
+    "medium_crossref",
+    "hard_audit",
+    "hard_adversarial",
+]
 
+client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 executor = ThreadPoolExecutor(max_workers=3)
 
-# ── Structured Logging (MANDATORY FORMAT) ─────────────────────────────────────
+# ── Structured Logging ───────────────────────────────────────────────────────
+
 
 def log_start(task: str, env: str, model: str) -> None:
     print(f"[START] task={task} env={env} model={model}", flush=True)
@@ -94,27 +98,24 @@ def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> No
     )
 
 
-# ── Prompts ───────────────────────────────────────────────────────────────────
+# ── Prompts ──────────────────────────────────────────────────────────────────
 
-DETECTION_PROMPT = """You are a PII (Personally Identifiable Information) detection expert.
-
-Analyze the following document and detect ALL PII entities.
+DETECTION_PROMPT = """You are a PII detection expert. Analyze the document and detect ALL PII entities.
 
 For each PII found, return a JSON object with:
 - "pii_type": One of: EMAIL, PHONE, SSN, CREDIT_CARD, DATE_OF_BIRTH, NAME, AGE, ADDRESS, LOCATION, IP_ADDRESS, EMPLOYEE_ID, MEDICAL_CONDITION, MEDICATION, ORGANIZATION, SALARY, BANK_ACCOUNT, PASSPORT, LICENSE_NUMBER, USERNAME, PASSWORD
-- "value": The exact text of the PII as it appears in the document
+- "value": The exact text of the PII as it appears
 - "start": Character offset where PII starts (0-indexed)
 - "end": Character offset where PII ends
 
-IMPORTANT rules:
-- Use exact character positions from the document
+IMPORTANT:
 - Detect ALL instances, even partial or obfuscated ones
-- Spelled-out numbers (e.g., "four-zero-eight") count as PII if they represent phone numbers, IPs, etc.
+- Spelled-out numbers count as PII if they represent phone numbers, IPs, etc.
 - Partially masked values (e.g., "XXXX-XXXX-7834") are still PII
-- Indirect references to age ("mid-fifties", "born in '94") count as AGE or DATE_OF_BIRTH
-- Health-related terms linked to a person (e.g., "diabetic", "chemotherapy", "AA meetings") are MEDICAL_CONDITION
-- Medications (e.g., "Metformin 500mg") are MEDICATION
-- Salary hints ("45 LPA", "north of 20 lakhs") are SALARY
+- Indirect age references ("mid-fifties", "born in '94") count as AGE or DATE_OF_BIRTH
+- Health terms linked to a person are MEDICAL_CONDITION
+- Medications are MEDICATION
+- Salary hints ("45 LPA") are SALARY
 
 Return ONLY a valid JSON array. No explanation, no markdown.
 
@@ -124,35 +125,13 @@ Document:
 \"\"\"
 """
 
-SECOND_PASS_PROMPT = """You are a PII detection specialist doing a SECOND PASS review.
-
-A first-pass detector found these PII entities:
-{first_pass}
-
-Review the document again. Look SPECIFICALLY for PII that the first pass MISSED:
-- Contextual PII: health conditions mentioned casually, indirect age references
-- Obfuscated PII: spelled-out numbers, partially masked values, encoded emails ("name at domain dot com")
-- Implicit PII: organization names that reveal identity, locations mentioned in passing
-- Linked PII: names of family members, emergency contacts, supervisors
-
-Return ONLY the ADDITIONAL PII entities not already found. If nothing was missed, return an empty array [].
-
-Return ONLY a valid JSON array with: pii_type, value, start, end. No explanation.
-
-Document:
-\"\"\"
-{document}
-\"\"\"
-"""
-
-REDACTION_PROMPT = """You are a data privacy expert. Given the following document and list of detected PII, create a redacted version where each PII value is replaced with its type tag in brackets.
+REDACTION_PROMPT = """You are a data privacy expert. Replace each detected PII with its [TYPE] tag.
 
 Example: "John at john@test.com" -> "[NAME] at [EMAIL]"
 
 Rules:
 - Replace EVERY detected PII value with its [TYPE] tag
 - Keep all non-PII text exactly as-is
-- Do not add or remove any other text
 
 Document:
 \"\"\"
@@ -165,54 +144,42 @@ Detected PII:
 Return ONLY the redacted document text. No explanation.
 """
 
-COMPLIANCE_PROMPT = """You are a Chief Privacy Officer conducting a compliance audit. Given the detected PII, generate a compliance report under the specified regulatory framework.
-
-Document:
-\"\"\"
-{document}
-\"\"\"
+COMPLIANCE_PROMPT = """You are a Chief Privacy Officer. Given detected PII, generate a compliance report.
 
 Detected PII:
 {pii_list}
 
-Applicable Frameworks: {framework}
+Frameworks: {framework}
 
-For each PII entity, assess:
-1. risk_level: "low", "medium", "high", or "critical"
-   - critical: SSN, Aadhaar, biometrics, children's data
-   - high: financial data, medical conditions, passwords
-   - medium: names, DOB, addresses, contact info
-   - low: organization names, general locations
-2. regulation: Cite the specific regulation (e.g., "DPDP Section 9(1)", "HIPAA §164.502", "GDPR Art.6")
-3. recommended_action: Specific actionable recommendation
+For each PII, assess:
+- risk_level: "low", "medium", "high", or "critical"
+- regulation: Cite specific regulation
+- recommended_action: Specific recommendation
 
-Return a JSON object with:
-- "findings": Array of objects with: value, pii_type, risk_level, regulation, recommended_action
-- "summary": 2-3 sentence executive summary covering total PII count, highest risk items, and primary regulatory concern
+Return JSON with:
+- "findings": Array of {{value, pii_type, risk_level, regulation, recommended_action}}
+- "summary": 2-3 sentence summary
 
-Return ONLY valid JSON. No explanation, no markdown.
+Return ONLY valid JSON.
 """
 
 
-# ── LLM Helper ────────────────────────────────────────────────────────────────
+# ── LLM Helper ───────────────────────────────────────────────────────────────
+
 
 def call_llm(prompt: str, max_tokens: int = 2048) -> str:
     """Call the LLM and return the response text."""
-    try:
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1,
-            max_tokens=max_tokens,
-            timeout=LLM_TIMEOUT,
-        )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        print(f"  [ERROR] LLM call failed: {e}", file=sys.stderr)
-        raise
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.1,
+        max_tokens=max_tokens,
+        timeout=LLM_TIMEOUT,
+    )
+    return response.choices[0].message.content.strip()
 
 
-def parse_json_response(text: str) -> any:
+def parse_json_response(text: str):
     """Parse JSON from LLM response, handling markdown code blocks."""
     text = text.strip()
     if text.startswith("```"):
@@ -222,10 +189,10 @@ def parse_json_response(text: str) -> any:
     return json.loads(text)
 
 
-# ── Agent Logic ───────────────────────────────────────────────────────────────
+# ── Agent Logic ──────────────────────────────────────────────────────────────
+
 
 def _parse_entities(raw_data: list) -> list[PIIEntity]:
-    """Parse a list of raw dicts into PIIEntity objects."""
     entities = []
     for item in raw_data:
         try:
@@ -240,51 +207,18 @@ def _parse_entities(raw_data: list) -> list[PIIEntity]:
     return entities
 
 
-def detect_pii(document: str, task_type: str = "easy") -> list[PIIEntity]:
-    """
-    Use LLM to detect PII in a document.
-    For medium/hard tasks, runs a second pass to catch contextual and obfuscated PII.
-    """
+def detect_pii(document: str) -> list[PIIEntity]:
+    """Use LLM to detect PII in a document."""
     prompt = DETECTION_PROMPT.format(document=document)
     response = call_llm(prompt)
-
     try:
-        first_pass_data = parse_json_response(response)
+        data = parse_json_response(response)
     except json.JSONDecodeError:
-        print("  [WARN] Failed to parse first pass response", file=sys.stderr)
         return []
-
-    entities = _parse_entities(first_pass_data)
-
-    # Second pass for non-easy tasks
-    if task_type != "easy":
-        first_pass_summary = json.dumps(
-            [{"pii_type": e.pii_type.value, "value": e.value} for e in entities],
-            indent=2,
-        )
-        second_prompt = SECOND_PASS_PROMPT.format(
-            first_pass=first_pass_summary,
-            document=document,
-        )
-        try:
-            second_response = call_llm(second_prompt)
-            second_data = parse_json_response(second_response)
-            additional = _parse_entities(second_data)
-
-            existing_values = {(e.pii_type.value, e.value.lower()) for e in entities}
-            for new_entity in additional:
-                key = (new_entity.pii_type.value, new_entity.value.lower())
-                if key not in existing_values:
-                    entities.append(new_entity)
-                    existing_values.add(key)
-        except (json.JSONDecodeError, Exception) as exc:
-            print(f"  [WARN] Second pass failed: {exc}", file=sys.stderr)
-
-    return entities
+    return _parse_entities(data)
 
 
 def generate_redaction(document: str, entities: list[PIIEntity]) -> str:
-    """Use LLM to generate redacted version of the document."""
     pii_list = json.dumps([e.model_dump() for e in entities], indent=2, default=str)
     prompt = REDACTION_PROMPT.format(document=document, pii_list=pii_list)
     return call_llm(prompt)
@@ -293,13 +227,11 @@ def generate_redaction(document: str, entities: list[PIIEntity]) -> str:
 def generate_compliance_report(
     document: str, entities: list[PIIEntity], framework: str
 ) -> ComplianceReport:
-    """Use LLM to generate a compliance report."""
     pii_list = json.dumps([e.model_dump() for e in entities], indent=2, default=str)
     prompt = COMPLIANCE_PROMPT.format(
         document=document, pii_list=pii_list, framework=framework
     )
     response = call_llm(prompt)
-
     try:
         cr_data = parse_json_response(response)
     except json.JSONDecodeError:
@@ -317,23 +249,17 @@ def generate_compliance_report(
             ))
         except (ValueError, KeyError):
             continue
-
-    return ComplianceReport(
-        findings=findings,
-        summary=cr_data.get("summary", ""),
-    )
+    return ComplianceReport(findings=findings, summary=cr_data.get("summary", ""))
 
 
-# ── Episode Runner ────────────────────────────────────────────────────────────
+# ── Episode Runner ───────────────────────────────────────────────────────────
 
-def run_episode(env: PIIScannerEnvironment, task_type: str) -> float:
-    """
-    Run a single episode for the given task type.
-    Emits [START], [STEP]*, [END] to stdout in the required format.
-    """
+
+async def run_episode(env: PIIScannerEnv, task_type: str) -> float:
+    """Run a single episode. Emits [START], [STEP]*, [END] to stdout."""
     is_hard = task_type in ("hard_audit", "hard_adversarial")
 
-    obs = env.reset(task_type=task_type)
+    result = await env.reset(task_type=task_type)
 
     log_start(task=task_type, env=BENCHMARK, model=MODEL_NAME)
 
@@ -343,49 +269,45 @@ def run_episode(env: PIIScannerEnvironment, task_type: str) -> float:
     score = 0.0
 
     try:
-        while not obs.done:
+        while not result.done:
             step_num += 1
+            obs = result.observation
             document = obs.document
             error = None
 
             try:
-                # Step 1: Detect PII (multi-pass for non-easy)
-                entities = detect_pii(document, task_type)
+                # Detect PII
+                entities = detect_pii(document)
 
-                # Step 2: For hard tasks, run redaction + compliance IN PARALLEL
+                # For hard tasks, run redaction + compliance in parallel
                 redacted_text = None
                 compliance_report = None
                 if is_hard:
-                    redact_future = executor.submit(
-                        generate_redaction, document, entities
-                    )
+                    redact_future = executor.submit(generate_redaction, document, entities)
                     comply_future = executor.submit(
                         generate_compliance_report,
                         document, entities, "DPDP Act 2023 (India), GDPR, HIPAA",
                     )
                     try:
                         redacted_text = redact_future.result(timeout=LLM_TIMEOUT + 5)
-                    except Exception as exc:
-                        print(f"  [WARN] Redaction failed: {exc}", file=sys.stderr)
+                    except Exception:
+                        pass
                     try:
                         compliance_report = comply_future.result(timeout=LLM_TIMEOUT + 5)
-                    except Exception as exc:
-                        print(f"  [WARN] Compliance failed: {exc}", file=sys.stderr)
+                    except Exception:
+                        pass
 
-                # Build action
                 action = PIIAction(
                     detected_pii=entities,
                     redacted_text=redacted_text,
                     compliance_report=compliance_report,
                 )
 
-                # Submit
-                obs = env.step(action)
+                result = await env.step(action)
 
-                reward = obs.reward if obs.reward is not None else 0.0
+                reward = result.reward or 0.0
                 rewards.append(reward)
 
-                # Build compact action description for log
                 action_desc = f"detect({len(entities)}_entities)"
                 if is_hard:
                     action_desc = f"detect({len(entities)}_entities)+redact+comply"
@@ -400,11 +322,10 @@ def run_episode(env: PIIScannerEnvironment, task_type: str) -> float:
                 step=step_num,
                 action=action_desc,
                 reward=reward,
-                done=obs.done,
+                done=result.done,
                 error=error,
             )
 
-        # Compute final score (average reward, clamped to [0, 1])
         score = sum(rewards) / len(rewards) if rewards else 0.0
         score = min(max(score, 0.0), 1.0)
         success = score >= SUCCESS_THRESHOLD
@@ -413,7 +334,6 @@ def run_episode(env: PIIScannerEnvironment, task_type: str) -> float:
         print(f"[WARN] Episode failed: {exc}", file=sys.stderr)
         score = sum(rewards) / len(rewards) if rewards else 0.0
         score = min(max(score, 0.0), 1.0)
-        success = False
 
     finally:
         log_end(success=success, steps=step_num, score=score, rewards=rewards)
@@ -421,42 +341,32 @@ def run_episode(env: PIIScannerEnvironment, task_type: str) -> float:
     return score
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# ── Main ─────────────────────────────────────────────────────────────────────
 
-def main():
-    """Run baseline inference across all 6 difficulty levels."""
+
+async def main() -> None:
     print("=" * 60, file=sys.stderr)
-    print("PII Scanner — Baseline Inference", file=sys.stderr)
+    print("PII Scanner — Inference", file=sys.stderr)
     print(f"Model: {MODEL_NAME}", file=sys.stderr)
     print(f"API: {API_BASE_URL}", file=sys.stderr)
+    print(f"Image: {IMAGE_NAME}", file=sys.stderr)
     print("=" * 60, file=sys.stderr)
 
-    env = PIIScannerEnvironment()
+    env = await PIIScannerEnv.from_docker_image(IMAGE_NAME)
     results = {}
 
-    task_types = [
-        "easy",
-        "medium_contextual",
-        "medium_obfuscated",
-        "medium_crossref",
-        "hard_audit",
-        "hard_adversarial",
-    ]
-
     try:
-        for task_type in task_types:
-            print(f"\n--- Running {task_type.upper()} tasks ---", file=sys.stderr)
-            start_time = time.time()
-
-            score = run_episode(env, task_type)
-            elapsed = time.time() - start_time
-
+        for task_type in TASK_TYPES:
+            print(f"\n--- Running {task_type.upper()} ---", file=sys.stderr)
+            score = await run_episode(env, task_type)
             results[task_type] = score
-            print(f"  Score: {score:.2%} ({elapsed:.1f}s)", file=sys.stderr)
+            print(f"  Score: {score:.2%}", file=sys.stderr)
     finally:
-        env.close()
+        try:
+            await env.close()
+        except Exception as e:
+            print(f"[DEBUG] env.close() error: {e}", file=sys.stderr)
 
-    # Final summary to stderr (not stdout — stdout is reserved for [START]/[STEP]/[END])
     avg_score = sum(results.values()) / len(results) if results else 0.0
     print(f"\n{'=' * 60}", file=sys.stderr)
     print("FINAL RESULTS:", file=sys.stderr)
@@ -467,4 +377,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

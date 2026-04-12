@@ -1,129 +1,76 @@
 """
-PII Scanner — WebSocket Client.
+PII Scanner — OpenEnv SDK Client.
 
-Provides both async and sync interfaces for interacting
-with the PII Scanner environment server.
+Provides the EnvClient subclass for connecting to the PII Scanner environment
+via WebSocket (compatible with from_docker_image() and from_env()).
 """
 
 from __future__ import annotations
 
-import asyncio
-import json
-from typing import Any, Dict, List, Optional
+from typing import Dict
 
-import websockets
+from openenv.core import EnvClient
+from openenv.core.client_types import StepResult
+from openenv.core.env_server.types import State
 
 from models import (
-    ComplianceReport,
     PIIAction,
-    PIIEntity,
     PIIObservation,
     PIIState,
+    PIIType,
     TaskDifficulty,
 )
 
 
-class PIIScannerClient:
+class PIIScannerEnv(EnvClient[PIIAction, PIIObservation, State]):
     """
-    WebSocket client for the PII Scanner environment.
+    Client for the PII Scanner Environment.
 
-    Usage (async):
-        async with PIIScannerClient("ws://localhost:8000/ws") as client:
-            obs = await client.reset(task_type="easy")
-            while not obs.done:
-                action = PIIAction(detected_pii=[...])
-                obs = await client.step(action)
-
-    Usage (sync):
-        client = PIIScannerClient.sync_connect("ws://localhost:8000/ws")
-        obs = client.sync_reset(task_type="easy")
+    Example with Docker:
+        >>> env = await PIIScannerEnv.from_docker_image("pii-scanner:latest")
+        >>> result = await env.reset(task_type="easy")
+        >>> print(result.observation.document)
+        >>> action = PIIAction(detected_pii=[...])
+        >>> result = await env.step(action)
     """
 
-    def __init__(self, base_url: str = "ws://localhost:8000/ws"):
-        self.base_url = base_url
-        self._ws = None
-        self._session_id = None
-
-    async def connect(self):
-        self._ws = await websockets.connect(self.base_url)
-        response = await self._ws.recv()
-        data = json.loads(response)
-        self._session_id = data.get("session_id")
-        return self
-
-    async def close(self):
-        if self._ws:
-            await self._ws.send(json.dumps({"type": "close"}))
-            await self._ws.close()
-
-    async def __aenter__(self):
-        return await self.connect()
-
-    async def __aexit__(self, *args):
-        await self.close()
-
-    async def reset(self, task_type: str = "easy") -> PIIObservation:
-        await self._ws.send(json.dumps({
-            "type": "reset",
-            "data": {"task_type": task_type},
-        }))
-        response = json.loads(await self._ws.recv())
-        return PIIObservation(**response["data"])
-
-    async def step(self, action: PIIAction) -> PIIObservation:
-        payload = {
-            "type": "step",
-            "data": {
-                "detected_pii": [e.model_dump() for e in action.detected_pii],
-                "redacted_text": action.redacted_text,
-                "compliance_report": (
-                    action.compliance_report.model_dump()
-                    if action.compliance_report
-                    else None
-                ),
-            },
+    def _step_payload(self, action: PIIAction) -> Dict:
+        """Convert PIIAction to JSON payload for step message."""
+        return {
+            "detected_pii": [e.model_dump() for e in action.detected_pii],
+            "redacted_text": action.redacted_text,
+            "compliance_report": (
+                action.compliance_report.model_dump()
+                if action.compliance_report
+                else None
+            ),
         }
-        await self._ws.send(json.dumps(payload, default=str))
-        response = json.loads(await self._ws.recv())
-        return PIIObservation(**response["data"])
 
-    async def state(self) -> PIIState:
-        await self._ws.send(json.dumps({"type": "state"}))
-        response = json.loads(await self._ws.recv())
-        return PIIState(**response["data"])
+    def _parse_result(self, payload: Dict) -> StepResult[PIIObservation]:
+        """Parse server response into StepResult[PIIObservation]."""
+        obs_data = payload.get("observation", {})
 
-    # ── Sync convenience methods ──────────────────────────────────────────
+        observation = PIIObservation(
+            document=obs_data.get("document", ""),
+            task_type=obs_data.get("task_type", "easy"),
+            task_id=obs_data.get("task_id", ""),
+            instructions=obs_data.get("instructions", ""),
+            feedback=obs_data.get("feedback"),
+            total_tasks=obs_data.get("total_tasks", 0),
+            current_task_number=obs_data.get("current_task_number", 0),
+            done=payload.get("done", False),
+            reward=payload.get("reward"),
+        )
 
-    @classmethod
-    def sync_connect(cls, base_url: str = "ws://localhost:8000/ws") -> "PIIScannerSyncClient":
-        return PIIScannerSyncClient(base_url)
+        return StepResult(
+            observation=observation,
+            reward=payload.get("reward"),
+            done=payload.get("done", False),
+        )
 
-
-class PIIScannerSyncClient:
-    """Synchronous wrapper around the async client."""
-
-    def __init__(self, base_url: str = "ws://localhost:8000/ws"):
-        self._async_client = PIIScannerClient(base_url)
-        self._loop = asyncio.new_event_loop()
-
-    def connect(self):
-        self._loop.run_until_complete(self._async_client.connect())
-        return self
-
-    def close(self):
-        self._loop.run_until_complete(self._async_client.close())
-
-    def reset(self, task_type: str = "easy") -> PIIObservation:
-        return self._loop.run_until_complete(self._async_client.reset(task_type))
-
-    def step(self, action: PIIAction) -> PIIObservation:
-        return self._loop.run_until_complete(self._async_client.step(action))
-
-    def state(self) -> PIIState:
-        return self._loop.run_until_complete(self._async_client.state())
-
-    def __enter__(self):
-        return self.connect()
-
-    def __exit__(self, *args):
-        self.close()
+    def _parse_state(self, payload: Dict) -> State:
+        """Parse server response into State object."""
+        return State(
+            episode_id=payload.get("episode_id"),
+            step_count=payload.get("step_count", 0),
+        )
